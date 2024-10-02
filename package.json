@@ -1,5 +1,5 @@
 {
-  "name": "kulala-ls",
+  "name": "@mistweaverco/kulala-ls",
   "description": "A minimal language server for HTTP syntax.",
   "version": "0.0.1",
   "scripts": {
