@@ -1,0 +1,44 @@
+{
+  "name": "kulala-ls",
+  "description": "A minimal language server for HTTP syntax.",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "lint": "eslint && prettier --check ."
+  },
+  "homepage": "https://github.com/mistweaverco/kulala-ls",
+  "authors": [
+    "Marco Kellershoff <marco@kellershoff.net>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/mistweaverco/kulala-ls.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mistweaverco/kulala-ls/issues"
+  },
+  "main": "./dist/kulala-ls.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "15.3.0",
+    "@rollup/plugin-typescript": "12.1.0",
+    "@types/node": "22.7.4",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-n": "15.7.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-promise": "6.6.0",
+    "prettier": "3.3.3",
+    "rollup": "4.22.5",
+    "tslib": "2.7.0",
+    "typescript": "5.6.2",
+    "typescript-eslint": "7.18.0"
+  }
+}

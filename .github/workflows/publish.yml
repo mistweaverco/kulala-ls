@@ -1,0 +1,47 @@
+---
+name: publish
+
+on:
+  workflow_run:
+    workflows:
+      - Build
+    types:
+      - completed
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          registry-url: "https://registry.npmjs.org"
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish
+  github:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        run: ./setup.sh
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: "https://npm.pkg.github.com"
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish
