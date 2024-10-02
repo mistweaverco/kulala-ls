@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "scripts": {
     "build": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "lint": "eslint && prettier --check ."
+    "lint": "npm-run-all lint:*",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --check ."
   },
   "homepage": "https://github.com/mistweaverco/kulala-ls",
   "authors": [
@@ -35,6 +37,7 @@
     "eslint-plugin-n": "15.7.0",
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-promise": "6.6.0",
+    "npm-run-all2": "6.2.3",
     "prettier": "3.3.3",
     "rollup": "4.22.5",
     "tslib": "2.7.0",
