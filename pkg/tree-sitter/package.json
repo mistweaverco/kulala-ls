@@ -1,0 +1,59 @@
+{
+  "name": "@mistweaverco/tree-sitter-kulala",
+  "description": "Kulala language grammar for Tree-sitter",
+  "version": "0.0.1",
+  "homepage": "https://github.com/mistweaverco/kulala-ls",
+  "authors": [
+    "Marco Kellershoff <marco@kellershoff.net>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/mistweaverco/kulala-ls.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mistweaverco/kulala-ls/issues"
+  },
+  "scripts": {
+    "install": "node-gyp-build",
+    "generate-parser": "tree-sitter generate",
+    "build": "tree-sitter build",
+    "start": "tree-sitter playground"
+  },
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
+  "tree-sitter": [
+    {
+      "scope": "source.http",
+      "file-types": [
+        "http"
+      ],
+      "highlights": [
+        "queries/highlights.scm",
+        "queries/injections.scm"
+      ],
+      "theme": {
+        "keyword": "blue",
+        "error": "red",
+        "comment": "grey"
+      }
+    }
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "globals": "15.10.0",
+    "tree-sitter-cli": "0.24.1"
+  },
+  "dependencies": {
+    "node-addon-api": "8.1.0",
+    "node-gyp-build": "4.8.2"
+  }
+}

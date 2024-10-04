@@ -1,34 +1,25 @@
 {
+  "$schema": "https://json.schemastore.org/package",
   "name": "@mistweaverco/kulala-ls",
   "description": "A minimal language server for HTTP syntax.",
   "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "build": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "build": "npm-run-all build:*",
+    "build:server": "rollup --silent --config rollup.config.mjs",
+    "build:tree-sitter": "npm run --workspace @mistweaverco/tree-sitter-kulala build",
     "lint": "npm-run-all lint:*",
-    "lint:eslint": "eslint .",
-    "lint:prettier": "prettier --check ."
+    "lint:server": "npm-run-all lint:server:*",
+    "lint:server:eslint": "eslint pkg/server",
+    "lint:server:prettier": "prettier --check pkg/server"
   },
-  "homepage": "https://github.com/mistweaverco/kulala-ls",
-  "authors": [
-    "Marco Kellershoff <marco@kellershoff.net>"
+  "workspaces": [
+    "pkg/*"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git@github.com/mistweaverco/kulala-ls.git"
-  },
-  "bugs": {
-    "url": "https://github.com/mistweaverco/kulala-ls/issues"
-  },
-  "main": "./dist/kulala-ls.js",
-  "files": [
-    "dist/**/*"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-typescript": "12.1.0",
+    "@types/eslint__js": "8.42.3",
     "@types/node": "22.7.4",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "eslint": "8.57.1",
@@ -41,7 +32,9 @@
     "prettier": "3.3.3",
     "rollup": "4.22.5",
     "tslib": "2.7.0",
-    "typescript": "5.6.2",
-    "typescript-eslint": "7.18.0"
+    "typescript": "5.5.4",
+    "typescript-eslint": "7.18.0",
+    "vscode-languageserver": "9.0.1",
+    "vscode-languageserver-textdocument": "1.0.12"
   }
 }
