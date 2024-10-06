@@ -37,7 +37,8 @@ jobs:
           name: tree-sitter-build
           path: pkg/tree-sitter
           retention-days: 1
-  npm:
+  npm-publish-server:
+    name: Publish Server
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -57,6 +58,19 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace @mistweaverco/kulala-ls
+  npm-publish-tree-sitter:
+    name: Publish Tree-sitter
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          registry-url: "https://registry.npmjs.org"
       - name: Download tree-sitter-build artifacts
         uses: actions/download-artifact@v4
         with:
