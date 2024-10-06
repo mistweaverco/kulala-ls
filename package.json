@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "@mistweaverco/kulala-ls",
+  "name": "@mistweaverco/kulala",
   "description": "A minimal language server for HTTP syntax.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "build": "npm-run-all build:*",

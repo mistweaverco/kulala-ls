@@ -1,7 +1,7 @@
 {
   "name": "@mistweaverco/tree-sitter-kulala",
   "description": "Kulala language grammar for Tree-sitter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage": "https://github.com/mistweaverco/kulala-ls",
   "authors": [
     "Marco Kellershoff <marco@kellershoff.net>"
@@ -22,7 +22,6 @@
   "main": "bindings/node",
   "types": "bindings/node",
   "files": [
-    "prebuilds/*",
     "grammar.js",
     "binding.gyp",
     "src/**"

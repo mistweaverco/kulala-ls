@@ -35,7 +35,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tree-sitter-build
-          path: pkg/tree-sitter
+          path: |
+            pkg/tree-sitter/grammar.js
+            pkg/tree-sitter/binding.gyp
+            pkg/tree-sitter/src/
           retention-days: 1
   npm-publish-server:
     name: Publish Server
