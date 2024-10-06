@@ -56,7 +56,7 @@ jobs:
       - name: Publish server
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish -w @mistweaverco/kulala-ls
+        run: npm publish --workspace @mistweaverco/kulala-ls
       - name: Download tree-sitter-build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -64,7 +64,7 @@ jobs:
       - name: Publish tree-sitter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish -w @mistweaverco/tree-sitter-kulala
+        run: npm publish --workspace @mistweaverco/tree-sitter-kulala
   github:
     needs: build
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
       - name: Publish server
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish -w @mistweaverco/kulala-ls
+        run: npm publish --workspace @mistweaverco/kulala-ls
       - name: Download tree-sitter-build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -89,4 +89,4 @@ jobs:
       - name: Publish tree-sitter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish -w @mistweaverco/tree-sitter-kulala
+        run: npm publish --workspace @mistweaverco/tree-sitter-kulala
