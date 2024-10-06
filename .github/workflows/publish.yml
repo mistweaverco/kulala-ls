@@ -28,14 +28,13 @@ jobs:
       - name: Archive server-build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: server-build
-          path: |
-            pkg/server/cli.js
+          name: server_build
+          path: pkg/server/cli.js
           retention-days: 1
       - name: Archive tree-sitter-build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tree-sitter-build
+          name: tree_sitter_build
           path: |
             pkg/tree-sitter/grammar.js
             pkg/tree-sitter/binding.gyp
@@ -57,7 +56,7 @@ jobs:
       - name: Download server-build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: server-build
+          name: server_build
       - name: Publish server
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -78,7 +77,7 @@ jobs:
       - name: Download tree-sitter-build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: tree-sitter-build
+          name: tree_sitter_build
       - name: Publish tree-sitter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
