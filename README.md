@@ -24,10 +24,18 @@ Kulala is swahili for "rest" or "relax".
 
 ## Install
 
+### Neovim
+
 > [!WARNING]
 > Requires Neovim 0.10.0+.
 
-Via:
+Install language server:
+
+```sh
+npm install -g @mistweaverco/kulala-ls
+```
+
+Recommended plugins:
 
 - [lazy.nvim](https://github.com/folke/lazy.nvim)
 - [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
@@ -39,6 +47,10 @@ Via:
 ```lua
 {
   "neovim/nvim-lspconfig",
+  dependencies = {
+    "hrsh7th/nvim-cmp",
+    "hrsh7th/cmp-nvim-lsp",
+  },
   config = function()
     local nvim_lsp = require("lspconfig")
     local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
