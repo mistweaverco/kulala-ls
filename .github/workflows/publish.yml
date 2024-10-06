@@ -65,28 +65,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace @mistweaverco/tree-sitter-kulala
-  github:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          registry-url: "https://npm.pkg.github.com"
-      - name: Download server-build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: server-build
-      - name: Publish server
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @mistweaverco/kulala-ls
-      - name: Download tree-sitter-build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: tree-sitter-build
-      - name: Publish tree-sitter
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish --workspace @mistweaverco/tree-sitter-kulala
