@@ -10,7 +10,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/mistweaverco/kulala-ls?style=for-the-badge)](https://github.com/mistweaverco/kulala-ls/releases/latest)
 [![Discord](https://img.shields.io/badge/discord-join-7289da?style=for-the-badge&logo=discord)](https://discord.gg/QyVQmfY4Rt)
 
-[Install](#install) • [Usage](https://kulala.mwco.app/docs/usage/) • [HTTP File Spec](https://kulala.mwco.app/docs/usage/http-file-spec)
+[Install](#install) •[Supports](#supports) • [Usage](https://kulala.mwco.app/docs/usage/) • [HTTP File Spec](https://kulala.mwco.app/docs/usage/http-file-spec)
 
 <p></p>
 
@@ -59,3 +59,19 @@ Via:
   end,
 }
 ```
+
+## Supports
+
+- Variable completion *(with support for multiple sources)*
+  - [x] `OS environment` (Kulala)
+  - [x] `http-client.env.json` (Kulala and Intellij)
+  - [x] `http-client.private.env.json` (Kulala and Intellij)
+  - [x] `.env` (Kulala and rest-nvim)
+  - [x] `.vscode/settings.json` *`rest-client.environmentVariables`* (Kulala and VSCode rest-client)
+  - [x] `*.code-workspace` *`rest-client.environmentVariables`* (Kulala and VSCode rest-client)
+- [x] Header name completion
+- [x] Header value completion
+- [x] Method completion
+- [x] Scheme completion
+- [x] HTTP Version completion
+
