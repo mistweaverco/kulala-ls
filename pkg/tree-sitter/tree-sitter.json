@@ -1,0 +1,34 @@
+{
+  "grammars": [
+    {
+      "name": "kulala",
+      "camelcase": "Kulala",
+      "scope": "source.kulala",
+      "path": ".",
+      "file-types": null,
+      "injection-regex": "^kulala$"
+    }
+  ],
+  "metadata": {
+    "version": "0.0.1",
+    "license": "MIT",
+    "description": "Kulala grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Marco Kellershoff",
+        "email": "marco@kellershoff.net"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/mistweaverco/kulala-ls"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true
+  }
+}

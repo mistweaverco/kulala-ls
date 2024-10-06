@@ -25,11 +25,17 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Archive build artifacts
+      - name: Archive server-build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: dist
+          name: server-build
+          path: pkg/server/dist
+          retention-days: 1
+      - name: Archive tree-sitter-build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-sitter-build
+          path: pkg/tree-sitter
           retention-days: 1
   npm:
     needs: build
@@ -43,14 +49,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           registry-url: "https://registry.npmjs.org"
-      - name: Download build artifacts
+      - name: Download server-build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build
-      - name: Publish
+          name: server-build
+      - name: Publish server
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish
+        run: npm publish -w @mistweaverco/kulala-ls
+      - name: Download tree-sitter-build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: tree-sitter-build
+      - name: Publish tree-sitter
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish -w @mistweaverco/tree-sitter-kulala
   github:
     needs: build
     runs-on: ubuntu-latest
@@ -60,11 +74,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           registry-url: "https://npm.pkg.github.com"
-      - name: Download build artifacts
+      - name: Download server-build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build
-      - name: Publish
+          name: server-build
+      - name: Publish server
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish -w @mistweaverco/kulala-ls
+      - name: Download tree-sitter-build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: tree-sitter-build
+      - name: Publish tree-sitter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish
+        run: npm publish -w @mistweaverco/tree-sitter-kulala
