@@ -1,9 +1,9 @@
 {
   "name": "@mistweaverco/kulala-ls",
   "description": "A minimal language server for HTTP syntax.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "bin": {
-    "kulala-ls": "./dist/cli.js"
+    "kulala-ls": "dist/cli.js"
   },
   "homepage": "https://github.com/mistweaverco/kulala-ls",
   "authors": [
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com/mistweaverco/kulala-ls.git"
+    "url": "git+ssh://git@github.com/mistweaverco/kulala-ls.git"
   },
   "bugs": {
     "url": "https://github.com/mistweaverco/kulala-ls/issues"

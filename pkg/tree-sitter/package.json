@@ -1,14 +1,14 @@
 {
   "name": "@mistweaverco/tree-sitter-kulala",
   "description": "Kulala language grammar for Tree-sitter",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "homepage": "https://github.com/mistweaverco/kulala-ls",
   "authors": [
     "Marco Kellershoff <marco@kellershoff.net>"
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com/mistweaverco/kulala-ls.git"
+    "url": "git+ssh://git@github.com/mistweaverco/kulala-ls.git"
   },
   "bugs": {
     "url": "https://github.com/mistweaverco/kulala-ls/issues"
