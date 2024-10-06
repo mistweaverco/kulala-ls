@@ -176,10 +176,10 @@ const getHttpClientEnvVariables = ({
   }
 
   return {
-    // ...vsCodeSettingsSharedEnv,
-    // ...vsCodeSettingsEnv,
-    // ...vsCodeWorkspaceSharedEnv,
-    // ...vsCodeWorkspaceEnv,
+    ...vsCodeSettingsSharedEnv,
+    ...vsCodeSettingsEnv,
+    ...vsCodeWorkspaceSharedEnv,
+    ...vsCodeWorkspaceEnv,
     ...sharedEnv,
     ...env,
     ...privateSharedEnv,
