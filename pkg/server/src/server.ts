@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import {
   createConnection,
   TextDocuments,
@@ -9,13 +7,27 @@ import {
   InitializeParams,
   DidChangeConfigurationNotification,
   CompletionItem,
-  CompletionItemKind,
-  TextDocumentPositionParams,
   TextDocumentSyncKind,
   InitializeResult,
+  CompletionParams,
 } from "vscode-languageserver/node";
 
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { Position, TextDocument } from "vscode-languageserver-textdocument";
+
+import {
+  getEnvironmentVariablesCompletionItems,
+  requestLineVersionCompletionItems,
+  requestLineMethodCompletionItems,
+  requestLineSchemaCompletionItems,
+  headerNameCompletionItems,
+  headerValueCompletionItems,
+} from "./completions";
+
+import TreeSitter from "tree-sitter";
+import Kulala from "@mistweaverco/tree-sitter-kulala";
+
+const TreeSitterParser = new TreeSitter();
+TreeSitterParser.setLanguage(Kulala);
 
 // Create a connection for the server, using stdio as a transport.
 // Also include all preview / proposed LSP features.
@@ -84,10 +96,14 @@ connection.onInitialized(() => {
 // The default settings
 interface DefaultSettings {
   maxNumberOfProblems: number;
+  selectedEnv: string;
 }
 
-// The global settings, used when the `workspace/configuration` request is not supported by the client.
-const defaultSettings: DefaultSettings = { maxNumberOfProblems: 1000 };
+// The global settings, can be updated via `workspace/configuration` request.
+const defaultSettings: DefaultSettings = {
+  maxNumberOfProblems: 1000,
+  selectedEnv: "dev",
+};
 let globalSettings: DefaultSettings = defaultSettings;
 
 // Cache the settings of all open documents
@@ -192,65 +208,130 @@ connection.onDidChangeWatchedFiles((change) => {
   );
 });
 
-// This handler provides the initial list of the completion items.
-connection.onCompletion(
-  (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-    connection.console.log(
-      "onCompletion: " + JSON.stringify(textDocumentPosition),
-    );
-    // TODO: Implement completion items from ./completions/*
-    // based on the textDocumentPosition and the context
-    // also add data to the completion items
-    return [
-      {
-        label: "POST",
-        kind: CompletionItemKind.Value,
-        data: {
-          detail: "POST",
-          documentation: "POST method",
-        },
-      },
-      {
-        label: "GET",
-        kind: CompletionItemKind.Value,
-        data: {
-          detail: "GET",
-          documentation: "GET method",
-        },
-      },
-      {
-        label: "https://",
-        kind: CompletionItemKind.Value,
-        data: {
-          detail: "https://",
-          documentation: "https schema",
-        },
-      },
-      {
-        label: "http://",
-        kind: CompletionItemKind.Value,
-        data: {
-          detail: "http://",
-          documentation: "http schema",
-        },
-      },
-      {
-        label: "HTTP/1.1",
-        kind: CompletionItemKind.Value,
-        data: {
-          detail: "HTTP/1.1",
-          documentation: "HTTP/1.1 version",
-        },
-      },
-      {
-        label: "HTTP/2",
-        kind: CompletionItemKind.Value,
-        data: {
-          detail: "HTTP/2",
-          documentation: "HTTP/2 version",
-        },
-      },
+const getCurrentTreeSitterNode = (
+  uri: string,
+  position: Position,
+): TreeSitter.SyntaxNode | null => {
+  const textDocument = documents.get(uri) as TextDocument;
+  const tree = TreeSitterParser.parse(textDocument.getText());
+  const rootNode = tree.rootNode;
+
+  const findNodeAtPosition = (
+    node: TreeSitter.SyntaxNode,
+  ): TreeSitter.SyntaxNode | null => {
+    const nodeStart = node.startPosition;
+    const nodeEnd = node.endPosition;
+
+    // Check if the position is within the node's range
+    if (
+      position.line > nodeStart.row ||
+      (position.line === nodeStart.row &&
+        position.character >= nodeStart.column)
+    ) {
+      if (
+        position.line < nodeEnd.row ||
+        (position.line === nodeEnd.row && position.character <= nodeEnd.column)
+      ) {
+        // Recursively check child nodes, returning the most specific one
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i) as TreeSitter.SyntaxNode;
+          const foundNode = findNodeAtPosition(child);
+          if (foundNode) {
+            return foundNode;
+          }
+        }
+        // If no more specific child node is found, return this node
+        return node;
+      }
+    }
+    return null;
+  };
+
+  return findNodeAtPosition(rootNode);
+};
+
+const getTreeSitterDocumentVariables = (
+  textDocument: TextDocument,
+): Record<string, string> => {
+  const tree = TreeSitterParser.parse(textDocument.getText());
+  const rootNode = tree.rootNode;
+
+  const variables: Record<string, string> = {};
+
+  const findVariableDeclarations = (node: TreeSitter.SyntaxNode) => {
+    if (node.type === "variable_declaration") {
+      // Extract variable name and value from the node
+      const variableNameNode = node.namedChild(0);
+      const variableValueNode = node.namedChild(1);
+
+      const variableName = variableNameNode ? variableNameNode.text : "";
+      const variableValue = variableValueNode ? variableValueNode.text : "";
+
+      if (variableName) {
+        variables[variableName] = variableValue;
+      }
+    }
+
+    // Recursively visit child nodes
+    for (let i = 0; i < node.childCount; i++) {
+      findVariableDeclarations(node.child(i) as TreeSitter.SyntaxNode);
+    }
+  };
+
+  // Start the traversal from the root node
+  findVariableDeclarations(rootNode);
+
+  return variables;
+};
+
+const getCompletionsBasedOnPosition = (
+  completionParams: CompletionParams,
+): CompletionItem[] => {
+  let completions = [] as CompletionItem[];
+  const node = getCurrentTreeSitterNode(
+    completionParams.textDocument.uri,
+    completionParams.position,
+  );
+  if (!node) {
+    return completions;
+  }
+  const parentType = node.parent?.type;
+  if (
+    (parentType === "ERROR" && node.type === "{{") ||
+    (parentType === "variable" && node.type === "identifier")
+  ) {
+    completions = getEnvironmentVariablesCompletionItems({
+      documentPath: completionParams.textDocument.uri,
+      documentVariables: getTreeSitterDocumentVariables(
+        documents.get(completionParams.textDocument.uri) as TextDocument,
+      ),
+      selectedEnv: globalSettings.selectedEnv,
+    });
+  }
+  if (parentType === "request" && node.type === "target_url") {
+    completions = [
+      ...requestLineMethodCompletionItems,
+      ...requestLineSchemaCompletionItems,
     ];
+  }
+  if (parentType === "request" && node.type === "http_version") {
+    completions = requestLineVersionCompletionItems;
+  }
+  if (parentType === "header" && node.type === "header_entity") {
+    completions = headerNameCompletionItems;
+  }
+  if (parentType === "header" && node.type === "value") {
+    completions = headerValueCompletionItems[
+      node.parent?.firstChild?.text as string
+    ] as CompletionItem[];
+  }
+  return completions;
+};
+
+connection.onCompletion(
+  (completionParams: CompletionParams): CompletionItem[] => {
+    connection.console.log("onCompletion: " + JSON.stringify(completionParams));
+    return getCompletionsBasedOnPosition(completionParams);
   },
 );
 

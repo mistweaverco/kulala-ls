@@ -1,7 +1,7 @@
 {
   "name": "@mistweaverco/kulala-ls",
   "description": "A minimal language server for HTTP syntax.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "bin": {
     "kulala-ls": "./dist/cli.js"
   },
@@ -21,5 +21,9 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@mistweaverco/tree-sitter-kulala": "*",
+    "tree-sitter": "0.21.1"
   }
 }

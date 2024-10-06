@@ -2,14 +2,14 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "./../../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ESNext",
     "lib": ["es2020"],
     "strict": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "target": "es2020",
-    "esModuleInterop": false
+    "esModuleInterop": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["node_modules/**/*", "dist/**/*"]
 }

@@ -2,11 +2,11 @@
   "$schema": "https://json.schemastore.org/package",
   "name": "@mistweaverco/kulala-ls",
   "description": "A minimal language server for HTTP syntax.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "npm-run-all build:*",
-    "build:server": "rollup --silent --config rollup.config.mjs",
+    "build:server": "rollup -c --environment INCLUDE_DEPS,BUILD:production",
     "build:tree-sitter": "npm run --workspace @mistweaverco/tree-sitter-kulala build",
     "lint": "npm-run-all lint:*",
     "lint:server": "npm-run-all lint:server:*",
@@ -16,12 +16,18 @@
   "workspaces": [
     "pkg/*"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "28.0.0",
+    "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-typescript": "12.1.0",
     "@types/eslint__js": "8.42.3",
     "@types/node": "22.7.4",
     "@typescript-eslint/eslint-plugin": "7.18.0",
+    "dotenv": "16.4.5",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.30.0",
@@ -31,6 +37,7 @@
     "npm-run-all2": "6.2.3",
     "prettier": "3.3.3",
     "rollup": "4.22.5",
+    "tree-sitter": "0.21.1",
     "tslib": "2.7.0",
     "typescript": "5.5.4",
     "typescript-eslint": "7.18.0",

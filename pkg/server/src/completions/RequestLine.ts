@@ -3,12 +3,12 @@ import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
 export const requestLineMethodCompletionItems: CompletionItem[] = [
   {
     label: "POST",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 1,
   },
   {
     label: "GET",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 2,
   },
 ];
@@ -16,12 +16,12 @@ export const requestLineMethodCompletionItems: CompletionItem[] = [
 export const requestLineSchemaCompletionItems: CompletionItem[] = [
   {
     label: "https",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 1,
   },
   {
     label: "http",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 2,
   },
 ];
@@ -29,17 +29,17 @@ export const requestLineSchemaCompletionItems: CompletionItem[] = [
 export const requestLineVersionCompletionItems: CompletionItem[] = [
   {
     label: "HTTP/1.1",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 1,
   },
   {
     label: "HTTP/2",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 2,
   },
   {
     label: "HTTP/3",
-    kind: CompletionItemKind.Value,
+    kind: CompletionItemKind.Keyword,
     data: 3,
   },
 ];
