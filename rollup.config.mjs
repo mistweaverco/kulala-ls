@@ -8,7 +8,7 @@ export default [
     input: "./pkg/server/src/index.ts",
     output: {
       format: "cjs",
-      file: "./pkg/server/dist/cli.js",
+      file: "./pkg/server/cli.js",
     },
     external: ["tree-sitter", "@mistweaverco/tree-sitter-kulala"],
     plugins: [

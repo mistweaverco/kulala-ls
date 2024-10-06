@@ -30,7 +30,7 @@ jobs:
         with:
           name: server-build
           path: |
-            pkg/server/dist/cli.js
+            pkg/server/cli.js
           retention-days: 1
       - name: Archive tree-sitter-build artifacts
         uses: actions/upload-artifact@v4
