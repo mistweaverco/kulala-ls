@@ -60,7 +60,10 @@ jobs:
       - name: Publish server
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @mistweaverco/kulala-ls
+        run: |
+          ls -l .
+          ls -l pkg/server
+          npm publish --workspace @mistweaverco/kulala-ls
   npm-publish-tree-sitter:
     name: Publish Tree-sitter
     needs: build
@@ -81,4 +84,7 @@ jobs:
       - name: Publish tree-sitter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @mistweaverco/tree-sitter-kulala
+        run: |
+          ls -l .
+          ls -l pkg/tree-sitter
+          npm publish --workspace @mistweaverco/tree-sitter-kulala
