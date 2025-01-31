@@ -1,3 +1,4 @@
+import fs from "fs";
 import {
   createConnection,
   TextDocuments,
@@ -21,6 +22,7 @@ import {
   requestLineSchemaCompletionItems,
   headerNameCompletionItems,
   headerValueCompletionItems,
+  getGraphQLCompletionItems,
 } from "./completions";
 
 import TreeSitter from "tree-sitter";
@@ -284,6 +286,20 @@ const getTreeSitterDocumentVariables = (
   return variables;
 };
 
+const getNodeThatBelongsToParentType = (
+  parentType: string,
+  node: TreeSitter.SyntaxNode,
+): TreeSitter.SyntaxNode | null => {
+  let currentNode = node;
+  while (currentNode.type !== parentType && currentNode.type !== "document") {
+    currentNode = currentNode.parent as TreeSitter.SyntaxNode;
+  }
+  if (currentNode.type === parentType) {
+    return currentNode;
+  }
+  return null;
+};
+
 const getCompletionsBasedOnPosition = (
   completionParams: CompletionParams,
 ): CompletionItem[] => {
@@ -324,6 +340,18 @@ const getCompletionsBasedOnPosition = (
     completions = headerValueCompletionItems[
       node.parent?.firstChild?.text as string
     ] as CompletionItem[];
+  }
+  const graphqlDataNode = getNodeThatBelongsToParentType("graphql_data", node);
+  if (graphqlDataNode) {
+    completions = getGraphQLCompletionItems({
+      documentPath: completionParams.textDocument.uri,
+      documentText: documents
+        .get(completionParams.textDocument.uri)
+        ?.getText() as string,
+      graphQLDataNode: graphqlDataNode,
+      position: completionParams.position,
+    });
+    fs.appendFileSync("/tmp/kulala-ls.log", JSON.stringify(completions));
   }
   return completions;
 };
