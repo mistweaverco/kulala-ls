@@ -22,7 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.nvim
 
 # dist
 /pkg/server/cli.js
