@@ -41,7 +41,7 @@ const getSchemaData = (
   }
 };
 
-const resolveGraphQLType = (type: GraphQLTypeRef) => {
+const resolveGraphQLType = (type: GraphQLTypeRef): string | undefined => {
   while (type?.kind === "NON_NULL" || type?.kind === "LIST") {
     type = type.ofType as GraphQLTypeRef;
   }
@@ -59,18 +59,20 @@ const getFieldCompletions = (
   );
   if (!type) return [];
 
+  let resolvedType;
+
   for (const key of fieldPath) {
     const field: GraphQLField | undefined = type.fields?.find(
       (f) => f.name === key,
     );
     if (!field) return [];
-    const resolvedType = schema.types.find(
+    resolvedType = schema.types.find(
       (t) => t.name === resolveGraphQLType(field.type),
     );
     if (!resolvedType) return [];
   }
 
-  return type.fields || [];
+  return resolvedType?.fields || [];
 };
 
 const extractGraphQLFieldPath = (
