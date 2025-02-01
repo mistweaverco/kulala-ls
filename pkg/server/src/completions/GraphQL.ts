@@ -10,7 +10,6 @@ import { CompletionItemKind } from "vscode-languageserver";
 import * as fs from "fs";
 import * as path from "path";
 import { Position } from "vscode-languageserver-textdocument";
-import { FileLogger } from "./../lib/FileLogger";
 
 const SCHEMA_FILE_SUFFIX = "graphql-schema.json";
 
@@ -70,10 +69,6 @@ const extractGraphQLFieldPath = (
     column: relativeColumn,
   });
 
-  FileLogger.write(`Initial node type: ${node?.type || "null"}\n`);
-  FileLogger.write(`Node text: ${node?.text || "null"}\n`);
-  FileLogger.write(`Parent node type: ${node?.parent?.type || "null"}\n`);
-
   const result = {
     fieldPath: [] as string[],
     isArgument: false,
@@ -89,7 +84,6 @@ const extractGraphQLFieldPath = (
     node?.type === "VariableDefinition" ||
     node?.parent?.type === "VariableDefinition"
   ) {
-    FileLogger.write("Detected variable definition context\n");
     result.isVariableDefinition = true;
 
     // Get operation type
@@ -106,7 +100,6 @@ const extractGraphQLFieldPath = (
       );
       result.operationType =
         (operationTypeNode?.text as "query" | "mutation") || "query";
-      FileLogger.write(`Operation type: ${result.operationType}\n`);
     }
 
     return result;
@@ -318,9 +311,6 @@ const getScalarTypeCompletions = (schema: GraphQLIntrospectionResult) => {
       t.kind === "SCALAR" || t.kind === "INPUT_OBJECT" || t.kind === "ENUM",
   );
 
-  FileLogger.write(`Found ${types.length} types for completion\n`);
-  types.forEach((t) => FileLogger.write(`Type: ${t.name} (${t.kind})\n`));
-
   return types.map((type) => ({
     label: type.name,
     kind: CompletionItemKind.TypeParameter,
@@ -332,38 +322,30 @@ const getScalarTypeCompletions = (schema: GraphQLIntrospectionResult) => {
 const getOperationArgumentCompletions = (
   schema: GraphQLIntrospectionResult,
 ) => {
-  return [
-    {
-      label: "skip",
-      kind: CompletionItemKind.Variable,
-      detail: "Int",
-      documentation: "Number of items to skip",
-    },
-    {
-      label: "first",
-      kind: CompletionItemKind.Variable,
-      detail: "Int",
-      documentation: "Number of items to return",
-    },
-    {
-      label: "after",
-      kind: CompletionItemKind.Variable,
-      detail: "String",
-      documentation: "Cursor for pagination",
-    },
-    {
-      label: "last",
-      kind: CompletionItemKind.Variable,
-      detail: "Int",
-      documentation: "Number of items to return from the end",
-    },
-    {
-      label: "before",
-      kind: CompletionItemKind.Variable,
-      detail: "String",
-      documentation: "Cursor for pagination",
-    },
-  ];
+  if (!schema) return [];
+
+  // Get the root type based on operation
+  const queryType = schema.types.find(
+    (t: GraphQLType) => t.name === schema.queryType.name,
+  );
+  if (!queryType?.fields) return [];
+
+  // Get all unique arguments from the root fields
+  const uniqueArgs = new Map();
+  queryType.fields.forEach((field) => {
+    field.args?.forEach((arg) => {
+      if (!uniqueArgs.has(arg.name)) {
+        uniqueArgs.set(arg.name, {
+          label: arg.name,
+          kind: CompletionItemKind.Variable,
+          detail: `${resolveGraphQLType(arg.type)}${arg.type.kind === "NON_NULL" ? "!" : ""}`,
+          documentation: arg.description || `Argument for ${field.name}`,
+        });
+      }
+    });
+  });
+
+  return Array.from(uniqueArgs.values());
 };
 
 const getVariableNameSuggestions = (
@@ -378,10 +360,6 @@ const getVariableNameSuggestions = (
 }[] => {
   if (!schema || !operationType) return [];
 
-  FileLogger.write(
-    `Getting variable suggestions for operation type: ${operationType}\n`,
-  );
-
   // Get the root type based on operation
   const rootType =
     operationType === "mutation"
@@ -391,7 +369,6 @@ const getVariableNameSuggestions = (
       : schema.types.find((t: GraphQLType) => t.name === schema.queryType.name);
 
   if (!rootType?.fields) {
-    FileLogger.write(`No root type fields found\n`);
     return [];
   }
 
@@ -399,10 +376,7 @@ const getVariableNameSuggestions = (
   const queryMatch = documentText.match(
     /(?:query|mutation)\s+(\w+)[\s\S]*?{\s*(\w+)/,
   );
-  const operationName = queryMatch?.[1];
   const fieldName = queryMatch?.[2];
-
-  FileLogger.write(`Operation: ${operationName}, Field: ${fieldName}\n`);
 
   // Find the specific field being queried
   const relevantField = fieldName
@@ -410,24 +384,14 @@ const getVariableNameSuggestions = (
     : null;
   const relevantFields = relevantField ? [relevantField] : rootType.fields;
 
-  FileLogger.write(`Found ${relevantFields.length} relevant fields\n`);
-
   // Get existing variables to filter them out
   const existingVars = new Set(
     Array.from(documentText.matchAll(/\$(\w+):/g)).map((m) => `$${m[1]}`),
   );
 
-  FileLogger.write(
-    `Existing variables: ${Array.from(existingVars).join(", ")}\n`,
-  );
-
   // Get all arguments from relevant fields
   const suggestions = relevantFields.flatMap((field) => {
     if (!field.args?.length) return [];
-
-    FileLogger.write(
-      `Processing field ${field.name} with ${field.args.length} arguments\n`,
-    );
 
     return field.args.map((arg) => {
       const typeInfo = resolveGraphQLType(arg.type);
@@ -445,11 +409,6 @@ const getVariableNameSuggestions = (
   // Filter out existing variables
   const filteredSuggestions = suggestions.filter(
     (suggestion) => !existingVars.has(suggestion.label),
-  );
-
-  FileLogger.write(`Returning ${filteredSuggestions.length} suggestions\n`);
-  FileLogger.write(
-    `Suggestions: ${JSON.stringify(filteredSuggestions, null, 2)}\n`,
   );
 
   return filteredSuggestions;
