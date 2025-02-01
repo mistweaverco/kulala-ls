@@ -38,22 +38,19 @@ npm install -g @mistweaverco/kulala-ls
 Recommended plugins:
 
 - [lazy.nvim](https://github.com/folke/lazy.nvim)
-- [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
-- [cmp-nvim-lsp](https://github.com/hrsh7th/cmp-nvim-lsp)
 - [lsp-config](https://github.com/neovim/nvim-lspconfig)
+- [blink.cmp](https://github.com/saghen/blink.cmp)
 
 ### Configuration
+
+Via Lazy:
 
 ```lua
 {
   "neovim/nvim-lspconfig",
-  dependencies = {
-    "hrsh7th/nvim-cmp",
-    "hrsh7th/cmp-nvim-lsp",
-  },
   config = function()
     local nvim_lsp = require("lspconfig")
-    local capabilities = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
     local servers = {
       "kulala_ls",
     }
@@ -69,6 +66,48 @@ Recommended plugins:
       end
     end
   end,
+},
+{
+  "saghen/blink.cmp",
+
+  build = "cargo build --release",
+  version = "*",
+
+  ---@module 'blink.cmp'
+  ---@type blink.cmp.Config
+  opts = {
+    -- 'default' for mappings similar to built-in completion
+    -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
+    -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
+    -- See the full "keymap" documentation for information on defining your own keymap.
+    keymap = {
+      preset = "default",
+      ["<CR>"] = { "select_and_accept", "fallback" },
+      cmdline = {
+        preset = "default",
+      },
+    },
+    completion = {
+      -- Show documentation when selecting a completion item
+      documentation = { auto_show = true, auto_show_delay_ms = 500 },
+    },
+
+    appearance = {
+      -- Set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+      -- Adjusts spacing to ensure icons are aligned
+      nerd_font_variant = "mono",
+    },
+
+    -- Default list of enabled providers defined so that you can extend it
+    -- elsewhere in your config, without redefining it, due to `opts_extend`
+    sources = {
+      default = {
+        "lsp",
+        "path",
+        "buffer",
+      },
+    },
+  },
 }
 ```
 
@@ -86,4 +125,13 @@ Recommended plugins:
 - [x] Method completion
 - [x] Scheme completion
 - [x] HTTP Version completion
+- [x] GraphQL completion via GraphQL schema introspection
 
+### GraphQL
+
+You need to have a GraphQL schema file somewhere in your project.
+
+The language server will look for it in the following order:
+
+1. `[filename].graphql-schema.json`
+2. `graphql-schema.json` (Keeps looking up the directory tree until it finds a schema file)
