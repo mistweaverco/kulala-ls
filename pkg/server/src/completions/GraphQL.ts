@@ -10,6 +10,7 @@ import { CompletionItemKind } from "vscode-languageserver";
 import * as fs from "fs";
 import * as path from "path";
 import { Position } from "vscode-languageserver-textdocument";
+import { FileLogger } from "./../lib/FileLogger";
 
 const SCHEMA_FILE_SUFFIX = "graphql-schema.json";
 
@@ -96,18 +97,11 @@ const extractGraphQLFieldPath = (
   });
 
   // Debugging output
-  fs.appendFileSync(
-    "/tmp/kulala-ls.log",
-    `Parsed Tree:\n${tree.rootNode.toString()}\n`,
-  );
-  fs.appendFileSync(
-    "/tmp/kulala-ls.log",
+  FileLogger.write(`Parsed Tree:\n${tree.rootNode.toString()}\n`);
+  FileLogger.write(
     `Relative cursor position: { line: ${relativeRow}, column: ${relativeColumn} }\n`,
   );
-  fs.appendFileSync(
-    "/tmp/kulala-ls.log",
-    `Cursor node type: ${node?.type || "null"}\n\n`,
-  );
+  FileLogger.write(`Cursor node type: ${node?.type || "null"}\n\n`);
 
   const fieldPath = [];
 
@@ -116,10 +110,7 @@ const extractGraphQLFieldPath = (
   }
 
   while (node) {
-    fs.appendFileSync(
-      "/tmp/kulala-ls.log",
-      `While node: ${node?.type || "null"}\n\n`,
-    );
+    FileLogger.write(`While node: ${node?.type || "null"}\n\n`);
     if (node.type === "Field") {
       const nameNode = node.namedChildren.find((n) => n.type === "Name");
       if (nameNode) {
@@ -129,10 +120,7 @@ const extractGraphQLFieldPath = (
     node = node.parent;
   }
 
-  fs.appendFileSync(
-    "/tmp/kulala-ls.log",
-    `Extracted fieldPath: ${JSON.stringify(fieldPath)}\n`,
-  );
+  FileLogger.write(`Extracted fieldPath: ${JSON.stringify(fieldPath)}\n`);
 
   return fieldPath;
 };
