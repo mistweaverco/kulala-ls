@@ -1,0 +1,1585 @@
+[
+  {
+    "type": "Alias",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Argument",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "Value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Arguments",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Argument",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ArgumentsDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "InputValueDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "BooleanValue",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "DefaultValue",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "ExecutableDefinition",
+          "named": true
+        },
+        {
+          "type": "TypeSystemDefinition",
+          "named": true
+        },
+        {
+          "type": "TypeSystemExtension",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Description",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "StringValue",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Arguments",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "DirectiveDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ArgumentsDefinition",
+          "named": true
+        },
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "DirectiveLocations",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "DirectiveLocation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "ExecutableDirectiveLocation",
+          "named": true
+        },
+        {
+          "type": "TypeSystemDirectiveLocation",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "DirectiveLocations",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "DirectiveLocation",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Directives",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Document",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EnumTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "EnumValuesDefinition",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EnumTypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "EnumValuesDefinition",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EnumValue",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EnumValueDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "EnumValue",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EnumValuesDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "EnumValueDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ExecutableDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "FragmentDefinition",
+          "named": true
+        },
+        {
+          "type": "OperationDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ExecutableDirectiveLocation",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "Field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Alias",
+          "named": true
+        },
+        {
+          "type": "Arguments",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "SelectionSet",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FieldDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ArgumentsDefinition",
+          "named": true
+        },
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directive",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FieldsDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "FieldDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FragmentDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "FragmentName",
+          "named": true
+        },
+        {
+          "type": "SelectionSet",
+          "named": true
+        },
+        {
+          "type": "TypeCondition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FragmentName",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "FragmentSpread",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "FragmentName",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ImplementsInterfaces",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "NamedType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InlineFragment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "SelectionSet",
+          "named": true
+        },
+        {
+          "type": "TypeCondition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InputFieldsDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "InputValueDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InputObjectTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "InputFieldsDefinition",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InputObjectTypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "InputFieldsDefinition",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InputValueDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "DefaultValue",
+          "named": true
+        },
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InterfaceTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "FieldsDefinition",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "InterfaceTypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "FieldsDefinition",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ListType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ListValue",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "Value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "NamedType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "NonNullType",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "ListType",
+          "named": true
+        },
+        {
+          "type": "NamedType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ObjectField",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "Value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ObjectTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "FieldsDefinition",
+          "named": true
+        },
+        {
+          "type": "ImplementsInterfaces",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ObjectTypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "FieldsDefinition",
+          "named": true
+        },
+        {
+          "type": "ImplementsInterfaces",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ObjectValue",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "ObjectField",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "OperationDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "OperationType",
+          "named": true
+        },
+        {
+          "type": "SelectionSet",
+          "named": true
+        },
+        {
+          "type": "VariableDefinitions",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "OperationType",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "OperationTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "NamedType",
+          "named": true
+        },
+        {
+          "type": "OperationType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ScalarTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ScalarTypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "SchemaDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "OperationTypeDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "SchemaExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "OperationTypeDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Selection",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Field",
+          "named": true
+        },
+        {
+          "type": "FragmentSpread",
+          "named": true
+        },
+        {
+          "type": "InlineFragment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "SelectionSet",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Selection",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "StringValue",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "Type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "ListType",
+          "named": true
+        },
+        {
+          "type": "NamedType",
+          "named": true
+        },
+        {
+          "type": "NonNullType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TypeCondition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "NamedType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "EnumTypeDefinition",
+          "named": true
+        },
+        {
+          "type": "InputObjectTypeDefinition",
+          "named": true
+        },
+        {
+          "type": "InterfaceTypeDefinition",
+          "named": true
+        },
+        {
+          "type": "ObjectTypeDefinition",
+          "named": true
+        },
+        {
+          "type": "ScalarTypeDefinition",
+          "named": true
+        },
+        {
+          "type": "UnionTypeDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "EnumTypeExtension",
+          "named": true
+        },
+        {
+          "type": "InputObjectTypeExtension",
+          "named": true
+        },
+        {
+          "type": "InterfaceTypeExtension",
+          "named": true
+        },
+        {
+          "type": "ObjectTypeExtension",
+          "named": true
+        },
+        {
+          "type": "ScalarTypeExtension",
+          "named": true
+        },
+        {
+          "type": "UnionTypeExtension",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TypeSystemDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "DirectiveDefinition",
+          "named": true
+        },
+        {
+          "type": "SchemaDefinition",
+          "named": true
+        },
+        {
+          "type": "TypeDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TypeSystemDirectiveLocation",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "TypeSystemExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "SchemaExtension",
+          "named": true
+        },
+        {
+          "type": "TypeExtension",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "UnionMemberTypes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "NamedType",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "UnionTypeDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Description",
+          "named": true
+        },
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "UnionMemberTypes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "UnionTypeExtension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Directives",
+          "named": true
+        },
+        {
+          "type": "Name",
+          "named": true
+        },
+        {
+          "type": "UnionMemberTypes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "BooleanValue",
+          "named": true
+        },
+        {
+          "type": "EnumValue",
+          "named": true
+        },
+        {
+          "type": "FloatValue",
+          "named": true
+        },
+        {
+          "type": "IntValue",
+          "named": true
+        },
+        {
+          "type": "ListValue",
+          "named": true
+        },
+        {
+          "type": "NullValue",
+          "named": true
+        },
+        {
+          "type": "ObjectValue",
+          "named": true
+        },
+        {
+          "type": "StringValue",
+          "named": true
+        },
+        {
+          "type": "Variable",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Variable",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "VariableDefinition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "DefaultValue",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        },
+        {
+          "type": "Variable",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "VariableDefinitions",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "VariableDefinition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_file",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Document",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "\"\"\"",
+    "named": false
+  },
+  {
+    "type": "$",
+    "named": false
+  },
+  {
+    "type": "&",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "...",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": "@",
+    "named": false
+  },
+  {
+    "type": "ARGUMENT_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "ENUM",
+    "named": false
+  },
+  {
+    "type": "ENUM_VALUE",
+    "named": false
+  },
+  {
+    "type": "FIELD",
+    "named": false
+  },
+  {
+    "type": "FIELD_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "FRAGMENT_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "FRAGMENT_SPREAD",
+    "named": false
+  },
+  {
+    "type": "FloatValue",
+    "named": true
+  },
+  {
+    "type": "INLINE_FRAGMENT",
+    "named": false
+  },
+  {
+    "type": "INPUT_FIELD_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "INPUT_OBJECT",
+    "named": false
+  },
+  {
+    "type": "INTERFACE",
+    "named": false
+  },
+  {
+    "type": "IntValue",
+    "named": true
+  },
+  {
+    "type": "MUTATION",
+    "named": false
+  },
+  {
+    "type": "Name",
+    "named": true
+  },
+  {
+    "type": "NullValue",
+    "named": true
+  },
+  {
+    "type": "OBJECT",
+    "named": false
+  },
+  {
+    "type": "QUERY",
+    "named": false
+  },
+  {
+    "type": "SCALAR",
+    "named": false
+  },
+  {
+    "type": "SCHEMA",
+    "named": false
+  },
+  {
+    "type": "SUBSCRIPTION",
+    "named": false
+  },
+  {
+    "type": "UNION",
+    "named": false
+  },
+  {
+    "type": "VARIABLE_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "comma",
+    "named": true
+  },
+  {
+    "type": "comment",
+    "named": true
+  },
+  {
+    "type": "directive",
+    "named": false
+  },
+  {
+    "type": "enum",
+    "named": false
+  },
+  {
+    "type": "extend",
+    "named": false
+  },
+  {
+    "type": "false",
+    "named": false
+  },
+  {
+    "type": "fragment",
+    "named": false
+  },
+  {
+    "type": "implements",
+    "named": false
+  },
+  {
+    "type": "input",
+    "named": false
+  },
+  {
+    "type": "interface",
+    "named": false
+  },
+  {
+    "type": "mutation",
+    "named": false
+  },
+  {
+    "type": "on",
+    "named": false
+  },
+  {
+    "type": "query",
+    "named": false
+  },
+  {
+    "type": "scalar",
+    "named": false
+  },
+  {
+    "type": "schema",
+    "named": false
+  },
+  {
+    "type": "subscription",
+    "named": false
+  },
+  {
+    "type": "true",
+    "named": false
+  },
+  {
+    "type": "type",
+    "named": false
+  },
+  {
+    "type": "union",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

@@ -1,4 +1,5 @@
-import Parser from "tree-sitter";
+import TreeSitter from "tree-sitter";
+import GraphQL from "@mistweaverco/tree-sitter-graphql";
 import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
 import * as fs from "fs";
 import * as path from "path";
@@ -6,8 +7,7 @@ import { Position } from "vscode-languageserver-textdocument";
 
 const SCHEMA_FILE_SUFFIX = "graphql-schema.json";
 
-// Utility to find the GraphQL schema file in the project directory
-const getSchemaFilePath = (documentPath: string) => {
+const getSchemaFilePath = (documentPath) => {
   let currentPath = path.dirname(documentPath);
   while (currentPath) {
     const schemaPath = path.join(currentPath, SCHEMA_FILE_SUFFIX);
@@ -21,7 +21,7 @@ const getSchemaFilePath = (documentPath: string) => {
   return null;
 };
 
-const getSchemaData = (schemaPath: string) => {
+const getSchemaData = (schemaPath) => {
   try {
     const fileContent = fs.readFileSync(schemaPath, "utf8");
     const json = JSON.parse(fileContent);
@@ -32,36 +32,6 @@ const getSchemaData = (schemaPath: string) => {
   }
 };
 
-type Field = {
-  name: string;
-  type: {
-    name?: string;
-    kind?: string;
-    ofType?: any;
-  };
-  description?: string;
-};
-
-// Extract possible completion fields from schema
-const getFieldCompletions = (schema: unknown, fieldPath: string[]): Field[] => {
-  if (!schema) return [];
-
-  let type = schema.types.find((t) => t.name === schema.queryType.name); // Start at root query type
-  if (!type) return [];
-
-  for (const key of fieldPath) {
-    const field = type.fields?.find((f) => f.name === key);
-    if (!field) return [];
-
-    // Resolve the actual type
-    type = schema.types.find((t) => t.name === resolveGraphQLType(field.type));
-    if (!type) return [];
-  }
-
-  return type.fields || [];
-};
-
-// Resolve the actual GraphQL type from the introspection schema
 const resolveGraphQLType = (type) => {
   while (type?.kind === "NON_NULL" || type?.kind === "LIST") {
     type = type.ofType;
@@ -69,11 +39,90 @@ const resolveGraphQLType = (type) => {
   return type?.name;
 };
 
-type GraphQLCompletionItemsOpts = {
-  documentPath: string;
-  documentText: string;
-  graphQLDataNode: Parser.SyntaxNode;
-  position: Position;
+const getFieldCompletions = (schema, fieldPath) => {
+  if (!schema) return [];
+
+  let type = schema.types.find((t) => t.name === schema.queryType.name);
+  if (!type) return [];
+
+  for (const key of fieldPath) {
+    const field = type.fields?.find((f) => f.name === key);
+    if (!field) return [];
+    type = schema.types.find((t) => t.name === resolveGraphQLType(field.type));
+    if (!type) return [];
+  }
+
+  return type.fields || [];
+};
+
+const extractGraphQLFieldPath = (documentText, graphqlNode, position) => {
+  const TreeSitterParser = new TreeSitter();
+  TreeSitterParser.setLanguage(GraphQL);
+
+  const queryText = documentText.substring(
+    graphqlNode.startIndex,
+    graphqlNode.endIndex,
+  );
+  const tree = TreeSitterParser.parse(queryText);
+
+  // Compute relative cursor position
+  const relativeRow = position.line - graphqlNode.startPosition.row;
+  const relativeColumn = position.character - graphqlNode.startPosition.column;
+
+  let node = tree.rootNode.namedDescendantForPosition({
+    row: relativeRow,
+    column: relativeColumn,
+  });
+
+  // Debugging output
+  fs.appendFileSync(
+    "/tmp/kulala-ls.log",
+    `Parsed Tree:\n${tree.rootNode.toString()}\n`,
+  );
+  fs.appendFileSync(
+    "/tmp/kulala-ls.log",
+    `Relative cursor position: { line: ${relativeRow}, column: ${relativeColumn} }\n`,
+  );
+  fs.appendFileSync(
+    "/tmp/kulala-ls.log",
+    `Cursor node type: ${node?.type || "null"}\n`,
+  );
+
+  const fieldPath = [];
+
+  // Step 1: Move up from `{}` (SelectionSet) to find nearest `Field`
+  while (node) {
+    if (node.type === "selection_set") {
+      if (node.parent?.type === "field") {
+        node = node.parent; // Move to the field that contains this selection_set
+        break;
+      }
+    }
+    node = node.parent;
+  }
+
+  // Step 2: Traverse upwards to extract field names
+  while (node) {
+    if (node.type === "field") {
+      const nameNode = node.childForFieldName("name");
+      if (nameNode) {
+        fieldPath.unshift(nameNode.text);
+      } else {
+        fs.appendFileSync(
+          "/tmp/kulala-ls.log",
+          `Warning: Field found, but no name!\n`,
+        );
+      }
+    }
+    node = node.parent;
+  }
+
+  fs.appendFileSync(
+    "/tmp/kulala-ls.log",
+    `Extracted fieldPath: ${JSON.stringify(fieldPath)}\n`,
+  );
+
+  return fieldPath;
 };
 
 export const getGraphQLCompletionItems = ({
@@ -81,110 +130,24 @@ export const getGraphQLCompletionItems = ({
   documentText,
   graphQLDataNode,
   position,
-}: GraphQLCompletionItemsOpts) => {
+}) => {
   const schemaPath = getSchemaFilePath(documentPath);
   if (!schemaPath) return [];
 
   const schema = getSchemaData(schemaPath);
-  if (!schema) {
-    fs.appendFileSync("/tmp/kulala-ls.log", "No schema found\n");
-    return [];
-  }
+  if (!schema) return [];
 
-  let fieldPath: string[] = [];
-  try {
-    // Log position
-    fs.appendFileSync(
-      "/tmp/kulala-ls.log",
-      `line: ${position.line}, column: ${position.character}\n`,
-    );
-
-    // Extract field paths
-    fieldPath = extractGraphQLFieldPath(documentText, graphQLDataNode, {
-      line: position.line,
-      column: position.character,
-    });
-  } catch (error) {
-    fs.appendFileSync("/tmp/kulala-ls.log", "Error parsing GraphQL document\n");
-    console.error("Error parsing GraphQL document:", error);
-  }
-
-  // Log field path
-  fs.appendFileSync(
-    "/tmp/kulala-ls.log",
-    `fieldPath: ${JSON.stringify(fieldPath)}\n`,
+  const fieldPath = extractGraphQLFieldPath(
+    documentText,
+    graphQLDataNode,
+    position,
   );
-
   const fields = getFieldCompletions(schema, fieldPath);
+
   return fields.map((field) => ({
     label: field.name,
     kind: CompletionItemKind.Field,
     detail: field.type?.name || "",
     documentation: field.description || "",
-  })) as CompletionItem[];
-};
-
-const extractGraphQLFieldPath = (
-  documentText: string,
-  graphqlNode: Parser.SyntaxNode,
-  cursorPosition: { line: number; column: number },
-): string[] => {
-  const fieldPath: string[] = [];
-
-  // Extract GraphQL query text from document
-  const queryText = documentText.substring(
-    graphqlNode.startIndex,
-    graphqlNode.endIndex,
-  );
-  const queryLines = queryText.split("\n");
-
-  // Calculate cursor's relative position inside the GraphQL query
-  const relativeLine = cursorPosition.line - graphqlNode.startPosition.row;
-  const relativeColumn = cursorPosition.column;
-
-  if (relativeLine < 0 || relativeLine >= queryLines.length) {
-    return []; // Cursor is outside the GraphQL block
-  }
-
-  // Get the line where the cursor is located
-  const currentLine = queryLines[relativeLine];
-
-  // Find cursor's character index within the current line
-  let cursorIndex = 0;
-  for (let i = 0; i < currentLine.length; i++) {
-    if (i === relativeColumn) break;
-    cursorIndex++;
-  }
-
-  // Manually parse GraphQL query fields
-  const tokens = currentLine.trim().split(/\s+/);
-  let insideField = false;
-  let nestedLevel = 0;
-
-  for (const token of tokens) {
-    if (token === "{") {
-      nestedLevel++;
-      insideField = true;
-      continue;
-    }
-    if (token === "}") {
-      nestedLevel--;
-      if (nestedLevel < 0) nestedLevel = 0;
-      fieldPath.pop(); // Move up the hierarchy
-      continue;
-    }
-
-    // If we're inside a selection set, track field names
-    if (insideField && nestedLevel > 0) {
-      fieldPath.push(token);
-    }
-
-    // Stop parsing if cursor is inside this token
-    if (cursorIndex <= token.length) {
-      break;
-    }
-    cursorIndex -= token.length + 1; // Adjust for spaces
-  }
-
-  return fieldPath;
+  }));
 };

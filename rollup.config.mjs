@@ -10,7 +10,11 @@ export default [
       format: "cjs",
       file: "./pkg/server/cli.js",
     },
-    external: ["tree-sitter", "@mistweaverco/tree-sitter-kulala"],
+    external: [
+      "tree-sitter",
+      "@mistweaverco/tree-sitter-kulala",
+      "@mistweaverco/tree-sitter-graphql",
+    ],
     plugins: [
       nodeResolve(),
       typescript({
