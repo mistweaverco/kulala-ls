@@ -11,19 +11,45 @@ import * as fs from "fs";
 import * as path from "path";
 import { Position } from "vscode-languageserver-textdocument";
 
-const SCHEMA_FILE_SUFFIX = "graphql-schema.json";
+const GENERIC_SCHEMA_FILE = "graphql-schema.json";
 
 const getSchemaFilePath = (documentPath: string) => {
-  let currentPath = path.dirname(documentPath);
+  // Strip the file:// protocol from the path
+  const cleanPath = documentPath.replace(/^file:\/\//, "");
+
+  // Get the directory and base filename without extension
+  const dir = path.dirname(cleanPath);
+  const baseFileName = path.basename(cleanPath, path.extname(cleanPath));
+
+  // Try file-specific schema first
+  const fileSpecificSchema = path.join(
+    dir,
+    `${baseFileName}.graphql-schema.json`,
+  );
+  if (fs.existsSync(fileSpecificSchema)) {
+    return fileSpecificSchema;
+  }
+
+  // Try generic schema in the same directory
+  const genericSchema = path.join(dir, GENERIC_SCHEMA_FILE);
+  if (fs.existsSync(genericSchema)) {
+    return genericSchema;
+  }
+
+  // Look in parent directories
+  let currentPath = dir;
   while (currentPath) {
-    const schemaPath = path.join(currentPath, SCHEMA_FILE_SUFFIX);
-    if (fs.existsSync(schemaPath)) {
-      return schemaPath;
+    // Try generic schema in parent directory
+    const parentGenericSchema = path.join(currentPath, GENERIC_SCHEMA_FILE);
+    if (fs.existsSync(parentGenericSchema)) {
+      return parentGenericSchema;
     }
+
     const parentPath = path.dirname(currentPath);
     if (parentPath === currentPath) break;
     currentPath = parentPath;
   }
+
   return null;
 };
 
@@ -300,23 +326,6 @@ const getExpectedVariableType = (
   // Find the argument's type in the field definition
   const arg = field.args.find((a) => a.name === argName);
   return arg?.type || null;
-};
-
-const getScalarTypeCompletions = (schema: GraphQLIntrospectionResult) => {
-  if (!schema) return [];
-
-  // Find all scalar, input object, and enum types
-  const types = schema.types.filter(
-    (t) =>
-      t.kind === "SCALAR" || t.kind === "INPUT_OBJECT" || t.kind === "ENUM",
-  );
-
-  return types.map((type) => ({
-    label: type.name,
-    kind: CompletionItemKind.TypeParameter,
-    detail: type.kind.toLowerCase(),
-    documentation: type.description || `${type.kind.toLowerCase()} type`,
-  }));
 };
 
 const getOperationArgumentCompletions = (
