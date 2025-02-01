@@ -1,13 +1,19 @@
-import TreeSitter from "tree-sitter";
+import TreeSitter, { SyntaxNode } from "tree-sitter";
 import GraphQL from "@mistweaverco/tree-sitter-graphql";
-import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
+import {
+  GraphQLField,
+  GraphQLIntrospectionResult,
+  GraphQLType,
+  GraphQLTypeRef,
+} from "./GraphQL.types";
+import { CompletionItemKind } from "vscode-languageserver";
 import * as fs from "fs";
 import * as path from "path";
 import { Position } from "vscode-languageserver-textdocument";
 
 const SCHEMA_FILE_SUFFIX = "graphql-schema.json";
 
-const getSchemaFilePath = (documentPath) => {
+const getSchemaFilePath = (documentPath: string) => {
   let currentPath = path.dirname(documentPath);
   while (currentPath) {
     const schemaPath = path.join(currentPath, SCHEMA_FILE_SUFFIX);
@@ -21,7 +27,9 @@ const getSchemaFilePath = (documentPath) => {
   return null;
 };
 
-const getSchemaData = (schemaPath) => {
+const getSchemaData = (
+  schemaPath: string,
+): GraphQLIntrospectionResult | null => {
   try {
     const fileContent = fs.readFileSync(schemaPath, "utf8");
     const json = JSON.parse(fileContent);
@@ -32,30 +40,43 @@ const getSchemaData = (schemaPath) => {
   }
 };
 
-const resolveGraphQLType = (type) => {
+const resolveGraphQLType = (type: GraphQLTypeRef) => {
   while (type?.kind === "NON_NULL" || type?.kind === "LIST") {
-    type = type.ofType;
+    type = type.ofType as GraphQLTypeRef;
   }
   return type?.name;
 };
 
-const getFieldCompletions = (schema, fieldPath) => {
+const getFieldCompletions = (
+  schema: GraphQLIntrospectionResult,
+  fieldPath: string[],
+): GraphQLField[] => {
   if (!schema) return [];
 
-  let type = schema.types.find((t) => t.name === schema.queryType.name);
+  const type = schema.types.find(
+    (t: GraphQLType) => t.name === schema.queryType.name,
+  );
   if (!type) return [];
 
   for (const key of fieldPath) {
-    const field = type.fields?.find((f) => f.name === key);
+    const field: GraphQLField | undefined = type.fields?.find(
+      (f) => f.name === key,
+    );
     if (!field) return [];
-    type = schema.types.find((t) => t.name === resolveGraphQLType(field.type));
-    if (!type) return [];
+    const resolvedType = schema.types.find(
+      (t) => t.name === resolveGraphQLType(field.type),
+    );
+    if (!resolvedType) return [];
   }
 
   return type.fields || [];
 };
 
-const extractGraphQLFieldPath = (documentText, graphqlNode, position) => {
+const extractGraphQLFieldPath = (
+  documentText: string,
+  graphqlNode: TreeSitter.SyntaxNode,
+  position: Position,
+) => {
   const TreeSitterParser = new TreeSitter();
   TreeSitterParser.setLanguage(GraphQL);
 
@@ -69,7 +90,7 @@ const extractGraphQLFieldPath = (documentText, graphqlNode, position) => {
   const relativeRow = position.line - graphqlNode.startPosition.row;
   const relativeColumn = position.character - graphqlNode.startPosition.column;
 
-  let node = tree.rootNode.namedDescendantForPosition({
+  let node: SyntaxNode | null = tree.rootNode.namedDescendantForPosition({
     row: relativeRow,
     column: relativeColumn,
   });
@@ -116,12 +137,19 @@ const extractGraphQLFieldPath = (documentText, graphqlNode, position) => {
   return fieldPath;
 };
 
+type GetGraphQLCompletionItemsArgs = {
+  documentPath: string;
+  documentText: string;
+  graphQLDataNode: SyntaxNode;
+  position: Position;
+};
+
 export const getGraphQLCompletionItems = ({
   documentPath,
   documentText,
   graphQLDataNode,
   position,
-}) => {
+}: GetGraphQLCompletionItemsArgs) => {
   const schemaPath = getSchemaFilePath(documentPath);
   if (!schemaPath) return [];
 
