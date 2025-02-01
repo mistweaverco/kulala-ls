@@ -1,3 +1,4 @@
+import fs from "fs";
 import {
   createConnection,
   TextDocuments,
@@ -10,6 +11,7 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
   CompletionParams,
+  MarkupKind,
 } from "vscode-languageserver/node";
 
 import { Position, TextDocument } from "vscode-languageserver-textdocument";
@@ -21,6 +23,7 @@ import {
   requestLineSchemaCompletionItems,
   headerNameCompletionItems,
   headerValueCompletionItems,
+  getGraphQLCompletionItems,
 } from "./completions";
 
 import TreeSitter from "tree-sitter";
@@ -60,10 +63,13 @@ connection.onInitialize((params: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      // Tell the client that this server supports code completion.
+      // Enable completion with documentation support
       completionProvider: {
-        resolveProvider: true,
+        resolveProvider: true, // Enable resolving additional information
+        triggerCharacters: [".", ":", "$", "(", ","],
       },
+      // Enable hover with documentation support
+      hoverProvider: true,
     },
   };
   if (hasWorkspaceFolderCapability) {
@@ -284,6 +290,20 @@ const getTreeSitterDocumentVariables = (
   return variables;
 };
 
+const getNodeThatBelongsToParentType = (
+  parentType: string,
+  node: TreeSitter.SyntaxNode,
+): TreeSitter.SyntaxNode | null => {
+  let currentNode = node;
+  while (currentNode.type !== parentType && currentNode.type !== "document") {
+    currentNode = currentNode.parent as TreeSitter.SyntaxNode;
+  }
+  if (currentNode.type === parentType) {
+    return currentNode;
+  }
+  return null;
+};
+
 const getCompletionsBasedOnPosition = (
   completionParams: CompletionParams,
 ): CompletionItem[] => {
@@ -325,6 +345,18 @@ const getCompletionsBasedOnPosition = (
       node.parent?.firstChild?.text as string
     ] as CompletionItem[];
   }
+  const graphqlDataNode = getNodeThatBelongsToParentType("graphql_data", node);
+  if (graphqlDataNode) {
+    completions = getGraphQLCompletionItems({
+      documentPath: completionParams.textDocument.uri,
+      documentText: documents
+        .get(completionParams.textDocument.uri)
+        ?.getText() as string,
+      graphQLDataNode: graphqlDataNode,
+      position: completionParams.position,
+    });
+    fs.appendFileSync("/tmp/kulala-ls.log", JSON.stringify(completions));
+  }
   return completions;
 };
 
@@ -335,14 +367,19 @@ connection.onCompletion(
   },
 );
 
-// This handler resolves additional information for the item selected in
-// the completion list.
+// Add completion resolve handler for documentation
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  return {
-    ...item,
-    detail: item.data.detail,
-    documentation: item.data.documentation,
-  };
+  if (item.documentation === undefined) {
+    // If documentation exists but wasn't initially sent
+    return {
+      ...item,
+      documentation: {
+        kind: MarkupKind.Markdown,
+        value: item.documentation || "",
+      },
+    };
+  }
+  return item;
 });
 
 // Make the text document manager listen on the connection
