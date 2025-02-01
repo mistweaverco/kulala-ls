@@ -61,9 +61,6 @@ const extractGraphQLFieldPath = (
     graphqlNode.endIndex,
   );
   const tree = TreeSitterParser.parse(queryText);
-  FileLogger.write(`Tree\n\n`);
-  FileLogger.write(tree.rootNode.toString());
-  FileLogger.write(`\n\n`);
 
   const relativeRow = position.line - graphqlNode.startPosition.row;
   const relativeColumn = position.character - graphqlNode.startPosition.column;
@@ -74,6 +71,8 @@ const extractGraphQLFieldPath = (
   });
 
   FileLogger.write(`Initial node type: ${node?.type || "null"}\n`);
+  FileLogger.write(`Node text: ${node?.text || "null"}\n`);
+  FileLogger.write(`Parent node type: ${node?.parent?.type || "null"}\n`);
 
   const result = {
     fieldPath: [] as string[],
@@ -83,13 +82,33 @@ const extractGraphQLFieldPath = (
     operationType: "query" as "query" | "mutation" | undefined,
   };
 
-  // Check if we're in a variable definition
+  // Check if we're in a variable definition section
   if (
+    node?.type === "VariableDefinitions" ||
+    node?.parent?.type === "VariableDefinitions" ||
     node?.type === "VariableDefinition" ||
-    node?.parent?.type === "VariableDefinition" ||
-    (node?.type === "OperationDefinition" && node.text.includes("$"))
+    node?.parent?.type === "VariableDefinition"
   ) {
+    FileLogger.write("Detected variable definition context\n");
     result.isVariableDefinition = true;
+
+    // Get operation type
+    const operationNode =
+      node.parent?.type === "OperationDefinition"
+        ? node.parent
+        : node.parent?.parent?.type === "OperationDefinition"
+          ? node.parent.parent
+          : null;
+
+    if (operationNode) {
+      const operationTypeNode = operationNode.namedChildren.find(
+        (n) => n.type === "OperationType",
+      );
+      result.operationType =
+        (operationTypeNode?.text as "query" | "mutation") || "query";
+      FileLogger.write(`Operation type: ${result.operationType}\n`);
+    }
+
     return result;
   }
 
@@ -253,20 +272,60 @@ const getArgumentCompletions = (
   return field?.args || [];
 };
 
+const getExpectedVariableType = (
+  schema: GraphQLIntrospectionResult,
+  documentText: string,
+  variableName: string,
+): GraphQLTypeRef | null => {
+  if (!schema) return null;
+
+  // Get the root type
+  const rootType = schema.types.find(
+    (t: GraphQLType) => t.name === schema.queryType.name,
+  );
+  if (!rootType?.fields) return null;
+
+  // Extract the field name and its arguments from the query
+  const fieldMatch = documentText.match(/{\s*(\w+)\s*\((.*?)\)/s);
+  if (!fieldMatch) return null;
+
+  const fieldName = fieldMatch[1];
+  const argsText = fieldMatch[2];
+
+  // Find the field in the schema
+  const field = rootType.fields.find((f) => f.name === fieldName);
+  if (!field?.args) return null;
+
+  // Find where this variable is used in the arguments
+  const variableUsageMatch = argsText.match(
+    new RegExp(`(\\w+):\\s*\\$${variableName.replace("$", "")}`),
+  );
+  if (!variableUsageMatch) return null;
+
+  const argName = variableUsageMatch[1];
+
+  // Find the argument's type in the field definition
+  const arg = field.args.find((a) => a.name === argName);
+  return arg?.type || null;
+};
+
 const getScalarTypeCompletions = (schema: GraphQLIntrospectionResult) => {
   if (!schema) return [];
 
-  // Find all scalar and input types
+  // Find all scalar, input object, and enum types
   const types = schema.types.filter(
     (t) =>
       t.kind === "SCALAR" || t.kind === "INPUT_OBJECT" || t.kind === "ENUM",
   );
 
+  FileLogger.write(`Found ${types.length} types for completion\n`);
+  types.forEach((t) => FileLogger.write(`Type: ${t.name} (${t.kind})\n`));
+
   return types.map((type) => ({
     label: type.name,
     kind: CompletionItemKind.TypeParameter,
     detail: type.kind.toLowerCase(),
-    documentation: type.description || "",
+    documentation: type.description || `${type.kind.toLowerCase()} type`,
   }));
 };
 
@@ -319,6 +378,10 @@ const getVariableNameSuggestions = (
 }[] => {
   if (!schema || !operationType) return [];
 
+  FileLogger.write(
+    `Getting variable suggestions for operation type: ${operationType}\n`,
+  );
+
   // Get the root type based on operation
   const rootType =
     operationType === "mutation"
@@ -327,31 +390,44 @@ const getVariableNameSuggestions = (
         )
       : schema.types.find((t: GraphQLType) => t.name === schema.queryType.name);
 
-  if (!rootType?.fields) return [];
-
-  // Extract the operation name from the document text
-  const operationMatch = documentText.match(/(?:query|mutation)\s+(\w+)/);
-  const operationName = operationMatch?.[1];
-
-  // If we have an operation name, find the specific field being queried
-  let relevantFields = rootType.fields;
-  if (operationName) {
-    const operationField = rootType.fields.find(
-      (f) => documentText.includes(f.name) && f.name !== operationName,
-    );
-    if (operationField) {
-      relevantFields = [operationField];
-    }
+  if (!rootType?.fields) {
+    FileLogger.write(`No root type fields found\n`);
+    return [];
   }
+
+  // Extract the operation name and field from the document text
+  const queryMatch = documentText.match(
+    /(?:query|mutation)\s+(\w+)[\s\S]*?{\s*(\w+)/,
+  );
+  const operationName = queryMatch?.[1];
+  const fieldName = queryMatch?.[2];
+
+  FileLogger.write(`Operation: ${operationName}, Field: ${fieldName}\n`);
+
+  // Find the specific field being queried
+  const relevantField = fieldName
+    ? rootType.fields.find((f) => f.name === fieldName)
+    : null;
+  const relevantFields = relevantField ? [relevantField] : rootType.fields;
+
+  FileLogger.write(`Found ${relevantFields.length} relevant fields\n`);
 
   // Get existing variables to filter them out
   const existingVars = new Set(
     Array.from(documentText.matchAll(/\$(\w+):/g)).map((m) => `$${m[1]}`),
   );
 
+  FileLogger.write(
+    `Existing variables: ${Array.from(existingVars).join(", ")}\n`,
+  );
+
   // Get all arguments from relevant fields
   const suggestions = relevantFields.flatMap((field) => {
     if (!field.args?.length) return [];
+
+    FileLogger.write(
+      `Processing field ${field.name} with ${field.args.length} arguments\n`,
+    );
 
     return field.args.map((arg) => {
       const typeInfo = resolveGraphQLType(arg.type);
@@ -367,9 +443,16 @@ const getVariableNameSuggestions = (
   });
 
   // Filter out existing variables
-  return suggestions.filter(
+  const filteredSuggestions = suggestions.filter(
     (suggestion) => !existingVars.has(suggestion.label),
   );
+
+  FileLogger.write(`Returning ${filteredSuggestions.length} suggestions\n`);
+  FileLogger.write(
+    `Suggestions: ${JSON.stringify(filteredSuggestions, null, 2)}\n`,
+  );
+
+  return filteredSuggestions;
 };
 
 type GetGraphQLCompletionItemsArgs = {
@@ -406,12 +489,7 @@ export const getGraphQLCompletionItems = ({
 
   // Return variable name suggestions when in variable definition section
   if (isVariableDefinition) {
-    // If cursor is at the start of a variable, suggest variable names
-    if (documentText[position.character - 1] !== ":") {
-      return getVariableNameSuggestions(schema, operationType, documentText);
-    }
-    // Otherwise suggest types
-    return getScalarTypeCompletions(schema);
+    return getVariableNameSuggestions(schema, operationType, documentText);
   }
 
   // Return operation argument suggestions
