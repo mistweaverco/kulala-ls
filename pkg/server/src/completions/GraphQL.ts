@@ -85,33 +85,24 @@ const extractGraphQLFieldPath = (documentText, graphqlNode, position) => {
   );
   fs.appendFileSync(
     "/tmp/kulala-ls.log",
-    `Cursor node type: ${node?.type || "null"}\n`,
+    `Cursor node type: ${node?.type || "null"}\n\n`,
   );
 
   const fieldPath = [];
 
-  // Step 1: Move up from `{}` (SelectionSet) to find nearest `Field`
-  while (node) {
-    if (node.type === "selection_set") {
-      if (node.parent?.type === "field") {
-        node = node.parent; // Move to the field that contains this selection_set
-        break;
-      }
-    }
+  if (node.type === "SelectionSet" && node.parent?.type === "Field") {
     node = node.parent;
   }
 
-  // Step 2: Traverse upwards to extract field names
   while (node) {
-    if (node.type === "field") {
-      const nameNode = node.childForFieldName("name");
+    fs.appendFileSync(
+      "/tmp/kulala-ls.log",
+      `While node: ${node?.type || "null"}\n\n`,
+    );
+    if (node.type === "Field") {
+      const nameNode = node.namedChildren.find((n) => n.type === "Name");
       if (nameNode) {
         fieldPath.unshift(nameNode.text);
-      } else {
-        fs.appendFileSync(
-          "/tmp/kulala-ls.log",
-          `Warning: Field found, but no name!\n`,
-        );
       }
     }
     node = node.parent;
