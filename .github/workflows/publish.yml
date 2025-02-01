@@ -40,6 +40,9 @@ jobs:
             pkg/tree-sitter/grammar.js
             pkg/tree-sitter/binding.gyp
             pkg/tree-sitter/src/
+            pkg/tree-sitter-graphql/grammar.js
+            pkg/tree-sitter-graphql/binding.gyp
+            pkg/tree-sitter-graphql/src/
           retention-days: 1
   npm-publish-server:
     name: Publish Server
@@ -63,8 +66,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace @mistweaverco/kulala-ls
-  npm-publish-tree-sitter:
-    name: Publish Tree-sitter
+  npm-publish-tree-sitter-kulala:
+    name: "Publish Tree-sitter: kulala"
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -84,4 +87,30 @@ jobs:
       - name: Publish tree-sitter
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace @mistweaverco/tree-sitter-kulala
+        run: |
+          npm publish --access public \
+            --workspace @mistweaverco/tree-sitter-kulala
+  npm-publish-tree-sitter-graphql:
+    name: "Publish Tree-sitter: graphql"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          registry-url: "https://registry.npmjs.org"
+      - name: Download tree-sitter-build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: tree_sitter_build
+          path: pkg/tree-sitter-graphql/
+      - name: Publish tree-sitter
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --access public \
+            --workspace @mistweaverco/tree-sitter-graphql
