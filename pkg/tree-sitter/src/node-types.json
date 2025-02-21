@@ -118,6 +118,11 @@
     }
   },
   {
+    "type": "http_version",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "json_body",
     "named": true,
     "fields": {}
@@ -270,10 +275,6 @@
         {
           "type": "res_redirect",
           "named": true
-        },
-        {
-          "type": "response",
-          "named": true
         }
       ]
     }
@@ -332,13 +333,66 @@
   {
     "type": "response",
     "named": true,
-    "fields": {},
+    "fields": {
+      "body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "external_body",
+            "named": true
+          },
+          {
+            "type": "graphql_body",
+            "named": true
+          },
+          {
+            "type": "json_body",
+            "named": true
+          },
+          {
+            "type": "multipart_form_data",
+            "named": true
+          },
+          {
+            "type": "raw_body",
+            "named": true
+          },
+          {
+            "type": "xml_body",
+            "named": true
+          }
+        ]
+      },
+      "header": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "header",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "comment",
+          "named": true
+        },
+        {
           "type": "http_version",
+          "named": true
+        },
+        {
+          "type": "res_handler_script",
+          "named": true
+        },
+        {
+          "type": "res_redirect",
           "named": true
         },
         {
@@ -367,6 +421,16 @@
         "types": [
           {
             "type": "request",
+            "named": true
+          }
+        ]
+      },
+      "response": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "response",
             "named": true
           }
         ]
@@ -502,10 +566,6 @@
   },
   {
     "type": "header_entity",
-    "named": true
-  },
-  {
-    "type": "http_version",
     "named": true
   },
   {

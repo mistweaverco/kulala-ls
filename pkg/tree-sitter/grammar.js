@@ -30,7 +30,7 @@ module.exports = grammar({
     [$._raw_body],
     [$._section_content],
   ],
-  inline: ($) => [$._target_url_line],
+  inline: ($) => [$._target_url_line, $.__body],
 
   rules: {
     document: ($) => repeat($.section),
@@ -42,29 +42,12 @@ module.exports = grammar({
     LINE_TAIL: (_) => LINE_TAIL,
     COMMENT_PREFIX: (_) => COMMENT_PREFIX,
 
-    comment: ($) =>
+    comment: ($) => choice($._plain_comment, $._var_comment),
+    _plain_comment: (_) => seq(COMMENT_PREFIX, LINE_TAIL),
+    _var_comment: ($) =>
       seq(
         COMMENT_PREFIX,
-        choice(
-          seq(
-            token(prec(2, "@")),
-            field("name", $.identifier),
-            optional(
-              seq(
-                choice(WS, "="),
-                optional(token(prec(1, WS))),
-                field("value", $.value),
-              ),
-            ),
-            NL,
-          ),
-          LINE_TAIL,
-        ),
-      ),
-    var_comment: ($) =>
-      seq(
-        COMMENT_PREFIX,
-        token(prec(2, "@")),
+        token(prec(PREC.VAR_COMMENT_PREFIX, "@")),
         field("name", $.identifier),
         optional(
           seq(
@@ -100,17 +83,16 @@ module.exports = grammar({
         seq($.comment, optional($._section_content)),
         seq($.variable_declaration, optional($._section_content)),
         seq($.pre_request_script, optional($._section_content)),
-        seq(
-          // field to easily find request node in each section
-          field("request", $.request),
-        ),
+        // field to easily find request node in each section
+        field("request", $.request),
+        field("response", $.response),
       ),
 
     // LIST http verb is arbitrary and required to use vaultproject
     method: (_) =>
       /(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT|PATCH|LIST|GRAPHQL|WEBSOCKET)/,
 
-    http_version: (_) => token(prec(0, /HTTP\/[\d\.]+/)),
+    http_version: (_) => prec.dynamic(1, token(prec(0, /HTTP\/[\d\.]+/))),
 
     _target_url_line: ($) =>
       repeat1(choice(WORD_CHAR, PUNCTUATION, $.variable, WS)),
@@ -120,8 +102,44 @@ module.exports = grammar({
     status_code: (_) => /[1-5]\d{2}/,
     status_text: (_) =>
       /(Continue|Switching Protocols|Processing|OK|Created|Accepted|Non-Authoritative Information|No Content|Reset Content|Partial Content|Multi-Status|Already Reported|IM Used|Multiple Choices|Moved Permanently|Found|See Other|Not Modified|Use Proxy|Switch Proxy|Temporary Redirect|Permanent Redirect|Bad Request|Unauthorized|Payment Required|Forbidden|Not Found|Method Not Allowed|Not Acceptable|Proxy Authentication Required|Request Timeout|Conflict|Gone|Length Required|Precondition Failed|Payload Too Large|URI Too Long|Unsupported Media Type|Range Not Satisfiable|Expectation Failed|I'm a teapot|Misdirected Request|Unprocessable Entity|Locked|Failed Dependency|Too Early|Upgrade Required|Precondition Required|Too Many Requests|Request Header Fields Too Large|Unavailable For Legal Reasons|Internal Server Error|Not Implemented|Bad Gateway|Service Unavailable|Gateway Timeout|HTTP Version Not Supported|Variant Also Negotiates|Insufficient Storage|Loop Detected|Not Extended|Network Authentication Required)/,
+    __body: ($) =>
+      seq(
+        repeat1($._blank_line),
+        prec.right(
+          repeat(
+            choice(
+              alias($._var_comment, $.comment),
+              field(
+                "body",
+                choice(
+                  $.raw_body,
+                  $.multipart_form_data,
+                  $.xml_body,
+                  $.json_body,
+                  $.graphql_body,
+                  $._external_body,
+                ),
+              ),
+              NL,
+              $.res_handler_script,
+              $.res_redirect,
+            ),
+          ),
+        ),
+      ),
     response: ($) =>
-      seq($.http_version, WS, $.status_code, WS, optional($.status_text), NL),
+      prec.right(
+        seq(
+          $.http_version,
+          WS,
+          $.status_code,
+          WS,
+          optional($.status_text),
+          NL,
+          repeat(field("header", $.header)),
+          optional($.__body),
+        ),
+      ),
 
     request: ($) =>
       prec.right(
@@ -130,35 +148,8 @@ module.exports = grammar({
           field("url", $.target_url),
           optional(seq(WS, field("version", $.http_version))),
           NL,
-          repeat($.comment),
-          optional($.response),
-          repeat(field("header", $.header)),
-          optional(
-            seq(
-              repeat1($._blank_line),
-              prec.right(
-                repeat(
-                  choice(
-                    alias($.var_comment, $.comment),
-                    field(
-                      "body",
-                      choice(
-                        $.raw_body,
-                        $.multipart_form_data,
-                        $.xml_body,
-                        $.json_body,
-                        $.graphql_body,
-                        $._external_body,
-                      ),
-                    ),
-                    NL,
-                    $.res_handler_script,
-                    $.res_redirect,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          repeat(choice($.comment, field("header", $.header))),
+          optional($.__body),
         ),
       ),
 
