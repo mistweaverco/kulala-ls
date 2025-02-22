@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # dist
-/pkg/server/cli.js
+/pkg/server/cli.cjs
