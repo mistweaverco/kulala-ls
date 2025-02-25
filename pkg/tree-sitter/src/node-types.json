@@ -194,7 +194,7 @@
     "named": true,
     "fields": {
       "body": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -270,6 +270,14 @@
       "types": [
         {
           "type": "comment",
+          "named": true
+        },
+        {
+          "type": "res_handler_script",
+          "named": true
+        },
+        {
+          "type": "res_redirect",
           "named": true
         }
       ]

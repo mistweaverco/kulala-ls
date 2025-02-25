@@ -942,46 +942,8 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "_blank_line"
-                  },
-                  {
-                    "type": "FIELD",
-                    "name": "body",
-                    "content": {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SYMBOL",
-                          "name": "raw_body"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "multipart_form_data"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "xml_body"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "json_body"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "graphql_body"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "_external_body"
-                        }
-                      ]
-                    }
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "__body"
               },
               {
                 "type": "BLANK"
