@@ -1,4 +1,3 @@
-import fs from "fs";
 import {
   createConnection,
   TextDocuments,
@@ -15,6 +14,7 @@ import {
 } from "vscode-languageserver/node";
 
 import { Position, TextDocument } from "vscode-languageserver-textdocument";
+import { LoggerBuilder } from "./Logger";
 
 import {
   getEnvironmentVariablesCompletionItems,
@@ -28,6 +28,8 @@ import {
 
 import TreeSitter from "tree-sitter";
 import Kulala from "@mistweaverco/tree-sitter-kulala";
+
+const Logger = new LoggerBuilder();
 
 const TreeSitterParser = new TreeSitter();
 TreeSitterParser.setLanguage(Kulala);
@@ -91,10 +93,8 @@ connection.onInitialized(() => {
     );
   }
   if (hasWorkspaceFolderCapability) {
-    connection.workspace.onDidChangeWorkspaceFolders((event) => {
-      connection.console.log(
-        "Workspace folder change event received., " + JSON.stringify(event),
-      );
+    connection.workspace.onDidChangeWorkspaceFolders(() => {
+      // handle workspace folder changes
     });
   }
 });
@@ -157,7 +157,6 @@ documents.onDidClose((e) => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
-  connection.console.log("onDidChangeContent: " + JSON.stringify(change));
   validateTextDocument(change.document);
 });
 
@@ -209,9 +208,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 }
 
 connection.onDidChangeWatchedFiles((change) => {
-  connection.console.log(
-    "We received a file change event: " + JSON.stringify(change),
-  );
+  Logger.log("We received a file change event: " + JSON.stringify(change));
 });
 
 const getCurrentTreeSitterNode = (
@@ -304,10 +301,140 @@ const getNodeThatBelongsToParentType = (
   return null;
 };
 
+// we're in a section and have no children, this means we're starting a request,
+// or we're in a section with only one or more comment children and/or
+// one or more request_separator children
+const isAtRequestStart = (node: TreeSitter.SyntaxNode): boolean => {
+  const allowedChildTypes = ["comment", "request_separator"];
+  if (node.type === "section" && node.childCount === 0) {
+    return true;
+  }
+  if (node.type === "section") {
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (!child) {
+        return false;
+      }
+      if (!allowedChildTypes.includes(child.type)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+};
+
+// we're in an ERROR and have one child that is method, this means we're in a request
+// and we're at the request scheme like before https, http, ws, wss
+const isAtRequestScheme = (node: TreeSitter.SyntaxNode): boolean => {
+  const atStart =
+    node.type === "ERROR" &&
+    node.childCount === 1 &&
+    node.firstChild?.type === "method";
+  return atStart;
+};
+
+// we're in a request node and have two children, method and url, this means we're at the http version
+const isAtHttpVersion = (node: TreeSitter.SyntaxNode): boolean => {
+  return (
+    node.type === "target_url" &&
+    node.parent?.childCount === 2 &&
+    node.parent?.firstChild?.type === "method" &&
+    node.parent?.lastChild?.type === "target_url"
+  );
+};
+
+const isAtHeaderStart = (node: TreeSitter.SyntaxNode): boolean => {
+  const firstHeader =
+    node.type === "request" &&
+    node.childCount === 2 &&
+    node.firstChild?.type === "method" &&
+    node.lastChild?.type === "target_url";
+  const consecutiveHeaders = node.type === "header" && node.childCount === 3;
+  const inTheMiddle =
+    (node.type === "target_url" && node.childCount === 0) ||
+    (node.type === "header_entity" && node.parent?.childCount === 1);
+  return firstHeader || consecutiveHeaders || inTheMiddle;
+};
+
+const isAtHeaderEntity = (node: TreeSitter.SyntaxNode): boolean => {
+  const atEntityStart =
+    node.type === "header" && node.firstChild?.type === "header_entity";
+  const atEntityValue = node.type === "value" && node.parent?.type === "header";
+  return atEntityStart || atEntityValue;
+};
+
+const isAtEnvironmentVariable = (
+  node: TreeSitter.SyntaxNode,
+  position: Position,
+): boolean => {
+  const parentType = node.parent?.type;
+  const isBody = node.type.endsWith("_body");
+
+  // If we're in body,
+  // we only have the node.text available, because we don't want to add parsers for
+  // every grammar you can think of.
+  // we're checking if the cursor is at the start of a variable then, we show the completions
+  if (isBody) {
+    // The cursor must be at least at position 2 for '{{' to exist before it.
+    if (position.character < 2) {
+      return false;
+    }
+
+    // Get the position.line but relative to the body node start
+    // because the position.line is relative to the whole document
+    // and we need to get the line relative to the body node
+    // so we can get the correct line from the body text
+    const bodyStartLine = node.startPosition.row;
+    const positionLine = position.line - bodyStartLine;
+
+    // We need to get the current line, because we can't get the whole text
+    // from the node, because it's a body node
+    // we're getting the line from the start of the line to the cursor position
+    // then we're checking if the last occurrence of '{{' is before the cursor
+    const bodySplit = node.text.trim().split("\n");
+    const bodyText = bodySplit[positionLine];
+    if (!bodyText) {
+      return false;
+    }
+
+    // Find the last occurrence of '{{'
+    const lastDoubleBraceIndex = bodyText.lastIndexOf("{{");
+    if (lastDoubleBraceIndex === -1) {
+      return false;
+    }
+
+    // The variable text starts immediately after '{{'
+    const variableStartIndex = lastDoubleBraceIndex + 2;
+
+    // If the cursor is before the variable even starts, it's not at an environment variable.
+    if (position.character < variableStartIndex) {
+      return false;
+    }
+
+    // Check if there's a closing '}}' between the start of the variable and the cursor.
+    // If there is, that means the variable is already closed.
+    const textBetween = bodyText.substring(
+      variableStartIndex,
+      position.character,
+    );
+    if (textBetween.includes("}}")) {
+      return false;
+    }
+    return true;
+  }
+
+  return (
+    (parentType === "ERROR" && node.type === "{{") ||
+    (parentType === "variable" && node.type === "identifier")
+  );
+};
+
 const getCompletionsBasedOnPosition = (
   completionParams: CompletionParams,
 ): CompletionItem[] => {
-  let completions = [] as CompletionItem[];
+  const completions = [] as CompletionItem[];
   const node = getCurrentTreeSitterNode(
     completionParams.textDocument.uri,
     completionParams.position,
@@ -315,12 +442,8 @@ const getCompletionsBasedOnPosition = (
   if (!node) {
     return completions;
   }
-  const parentType = node.parent?.type;
-  if (
-    (parentType === "ERROR" && node.type === "{{") ||
-    (parentType === "variable" && node.type === "identifier")
-  ) {
-    completions = getEnvironmentVariablesCompletionItems({
+  if (isAtEnvironmentVariable(node, completionParams.position)) {
+    return getEnvironmentVariablesCompletionItems({
       documentPath: completionParams.textDocument.uri,
       documentVariables: getTreeSitterDocumentVariables(
         documents.get(completionParams.textDocument.uri) as TextDocument,
@@ -328,26 +451,26 @@ const getCompletionsBasedOnPosition = (
       selectedEnv: globalSettings.selectedEnv,
     });
   }
-  if (parentType === "request" && node.type === "target_url") {
-    completions = [
-      ...requestLineMethodCompletionItems,
-      ...requestLineSchemaCompletionItems,
-    ];
+  if (isAtRequestStart(node)) {
+    return requestLineMethodCompletionItems;
   }
-  if (parentType === "request" && node.type === "http_version") {
-    completions = requestLineVersionCompletionItems;
+  if (isAtRequestScheme(node)) {
+    return requestLineSchemaCompletionItems;
   }
-  if (parentType === "header" && node.type === "header_entity") {
-    completions = headerNameCompletionItems;
+  if (isAtHttpVersion(node)) {
+    return requestLineVersionCompletionItems;
   }
-  if (parentType === "header" && node.type === "value") {
-    completions = headerValueCompletionItems[
-      node.parent?.firstChild?.text as string
-    ] as CompletionItem[];
+  if (isAtHeaderStart(node)) {
+    return headerNameCompletionItems;
+  }
+  if (isAtHeaderEntity(node)) {
+    const headerName = (node.firstChild?.text ||
+      node.parent?.firstChild?.text) as string;
+    return headerValueCompletionItems[headerName] || [];
   }
   const graphqlDataNode = getNodeThatBelongsToParentType("graphql_data", node);
   if (graphqlDataNode) {
-    completions = getGraphQLCompletionItems({
+    return getGraphQLCompletionItems({
       documentPath: completionParams.textDocument.uri,
       documentText: documents
         .get(completionParams.textDocument.uri)
@@ -355,14 +478,12 @@ const getCompletionsBasedOnPosition = (
       graphQLDataNode: graphqlDataNode,
       position: completionParams.position,
     });
-    fs.appendFileSync("/tmp/kulala-ls.log", JSON.stringify(completions));
   }
   return completions;
 };
 
 connection.onCompletion(
   (completionParams: CompletionParams): CompletionItem[] => {
-    connection.console.log("onCompletion: " + JSON.stringify(completionParams));
     return getCompletionsBasedOnPosition(completionParams);
   },
 );

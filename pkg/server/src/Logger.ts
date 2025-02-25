@@ -1,10 +1,23 @@
 import * as fs from "fs";
 
-class Logger {
+const getTempDir = (): string => {
+  switch (process.platform) {
+    case "win32":
+      return process.env.TEMP as string;
+    case "linux":
+      return "/tmp";
+    case "darwin":
+      return "/tmp";
+    default:
+      throw new Error("Unsupported platform");
+  }
+};
+
+class LoggerBuilder {
   private logFilePath: string;
 
-  constructor(logPath: string = "/tmp/kulala-ls.log") {
-    this.logFilePath = logPath;
+  constructor() {
+    this.logFilePath = `${getTempDir()}/kulala-ls.log`;
   }
 
   log(...args: unknown[]): void {
@@ -17,4 +30,4 @@ class Logger {
   }
 }
 
-export { Logger };
+export { LoggerBuilder };

@@ -95,9 +95,18 @@ module.exports = grammar({
     http_version: (_) => prec.dynamic(1, token(prec(0, /HTTP\/[\d\.]+/))),
 
     _target_url_line: ($) =>
-      repeat1(choice(WORD_CHAR, PUNCTUATION, $.variable, WS)),
+      seq(
+        // Must start with at least one valid URL character
+        choice(WORD_CHAR, PUNCTUATION, $.variable),
+        // Followed by optional additional URL characters
+        repeat(choice(WORD_CHAR, PUNCTUATION, $.variable, WS))
+      ),
+
     target_url: ($) =>
-      seq($._target_url_line, repeat(seq(NL, WS, $._target_url_line))),
+      seq(
+        $._target_url_line,
+        repeat(seq(NL, WS, $._target_url_line))
+      ),
 
     status_code: (_) => /[1-5]\d{2}/,
     status_text: (_) =>
@@ -149,7 +158,21 @@ module.exports = grammar({
           optional(seq(WS, field("version", $.http_version))),
           NL,
           repeat(choice($.comment, field("header", $.header))),
-          optional($.__body),
+          optional(
+            seq(
+              $._blank_line,
+              field("body", 
+                choice(
+                  $.raw_body,
+                  $.multipart_form_data,
+                  $.xml_body,
+                  $.json_body,
+                  $.graphql_body,
+                  $._external_body,
+                )
+              )
+            )
+          )
         ),
       ),
 
@@ -161,15 +184,35 @@ module.exports = grammar({
         ),
       ),
 
-    header: ($) =>
+    header: ($) => choice(
+      // Valid header format
       seq(
-        field("name", $.header_entity),
-        optional(WS),
-        ":",
-        optional(token(prec(1, WS))),
-        optional(field("value", choice($.value))),
+        seq(
+          field("name", $.header_entity),
+          optional(WS),
+          ":",
+          optional(token(prec(1, WS))),
+          optional(field("value", choice($.value))),
+        ),
         NL,
       ),
+      // Partial/incomplete header
+      alias(
+        seq(
+          field("partial_name", /[A-Za-z][^\n\r]*/),
+          NL,
+        ),
+        $.incomplete_header
+      ),
+      // Invalid header line
+      alias(
+        seq(
+          /[^\n\r]+/,
+          NL,
+        ),
+        $.invalid_header
+      ),
+    ),
 
     // {{foo}} {{$bar}} {{ fizzbuzz }}
     variable: ($) =>
@@ -265,8 +308,9 @@ module.exports = grammar({
     raw_body: ($) =>
       seq(
         choice(
-          token(prec(1, seq(/.+/, NL))),
+          token(prec(1, seq(/[^\n\r]+/, NL))),
           seq(COMMENT_PREFIX, $._not_comment),
+          token(prec(1, seq(/[^\n\r]?/, NL)))
         ),
         optional($._raw_body),
       ),
