@@ -99,14 +99,11 @@ module.exports = grammar({
         // Must start with at least one valid URL character
         choice(WORD_CHAR, PUNCTUATION, $.variable),
         // Followed by optional additional URL characters
-        repeat(choice(WORD_CHAR, PUNCTUATION, $.variable, WS))
+        repeat(choice(WORD_CHAR, PUNCTUATION, $.variable, WS)),
       ),
 
     target_url: ($) =>
-      seq(
-        $._target_url_line,
-        repeat(seq(NL, WS, $._target_url_line))
-      ),
+      seq($._target_url_line, repeat(seq(NL, WS, $._target_url_line))),
 
     status_code: (_) => /[1-5]\d{2}/,
     status_text: (_) =>
@@ -158,21 +155,7 @@ module.exports = grammar({
           optional(seq(WS, field("version", $.http_version))),
           NL,
           repeat(choice($.comment, field("header", $.header))),
-          optional(
-            seq(
-              $._blank_line,
-              field("body", 
-                choice(
-                  $.raw_body,
-                  $.multipart_form_data,
-                  $.xml_body,
-                  $.json_body,
-                  $.graphql_body,
-                  $._external_body,
-                )
-              )
-            )
-          )
+          optional($.__body),
         ),
       ),
 
@@ -184,14 +167,15 @@ module.exports = grammar({
         ),
       ),
 
-    header: ($) => seq(
-      field("name", choice($.header_entity, $.variable)),
-      optional(WS),
-      ":",
-      optional(token(prec(1, WS))),
-      optional(field("value", $.value)),
-      NL,
-    ),
+    header: ($) =>
+      seq(
+        field("name", choice($.header_entity, $.variable)),
+        optional(WS),
+        ":",
+        optional(token(prec(1, WS))),
+        optional(field("value", $.value)),
+        NL,
+      ),
 
     // {{foo}} {{$bar}} {{ fizzbuzz }}
     variable: ($) =>
@@ -289,7 +273,7 @@ module.exports = grammar({
         choice(
           token(prec(1, seq(/[^\n\r]+/, NL))),
           seq(COMMENT_PREFIX, $._not_comment),
-          token(prec(1, seq(/[^\n\r]?/, NL)))
+          token(prec(1, seq(/[^\n\r]?/, NL))),
         ),
         optional($._raw_body),
       ),
