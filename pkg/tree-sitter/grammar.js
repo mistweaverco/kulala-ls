@@ -3,10 +3,10 @@
 
 const PREC = {
   VAR_COMMENT_PREFIX: 2,
-  BODY_PREFIX: 2,
-  RAW_BODY: 3,
-  GRAPQL_JSON_PREFIX: 4,
-  COMMENT_PREFIX: 5,
+  BODY_PREFIX: 3,
+  RAW_BODY: 4,
+  GRAPQL_JSON_PREFIX: 5,
+  COMMENT_PREFIX: 6,
   REQ_SEPARATOR: 9,
 };
 
@@ -184,34 +184,13 @@ module.exports = grammar({
         ),
       ),
 
-    header: ($) => choice(
-      // Valid header format
-      seq(
-        seq(
-          field("name", $.header_entity),
-          optional(WS),
-          ":",
-          optional(token(prec(1, WS))),
-          optional(field("value", choice($.value))),
-        ),
-        NL,
-      ),
-      // Partial/incomplete header
-      alias(
-        seq(
-          field("partial_name", /[A-Za-z][^\n\r]*/),
-          NL,
-        ),
-        $.incomplete_header
-      ),
-      // Invalid header line
-      alias(
-        seq(
-          /[^\n\r]+/,
-          NL,
-        ),
-        $.invalid_header
-      ),
+    header: ($) => seq(
+      field("name", choice($.header_entity, $.variable)),
+      optional(WS),
+      ":",
+      optional(token(prec(1, WS))),
+      optional(field("value", $.value)),
+      NL,
     ),
 
     // {{foo}} {{$bar}} {{ fizzbuzz }}

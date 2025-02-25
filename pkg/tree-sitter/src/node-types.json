@@ -102,6 +102,10 @@
           {
             "type": "header_entity",
             "named": true
+          },
+          {
+            "type": "variable",
+            "named": true
           }
         ]
       },
@@ -190,7 +194,7 @@
     "named": true,
     "fields": {
       "body": {
-        "multiple": true,
+        "multiple": false,
         "required": false,
         "types": [
           {
@@ -266,14 +270,6 @@
       "types": [
         {
           "type": "comment",
-          "named": true
-        },
-        {
-          "type": "res_handler_script",
-          "named": true
-        },
-        {
-          "type": "res_redirect",
           "named": true
         }
       ]
