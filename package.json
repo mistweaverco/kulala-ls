@@ -17,6 +17,9 @@
     "lint:server:eslint": "eslint pkg/server",
     "lint:server:prettier": "prettier --check pkg/server"
   },
+  "bin": {
+    "kulala-ls": "pkg/server/cli.cjs"
+  },
   "workspaces": [
     "pkg/*"
   ],
