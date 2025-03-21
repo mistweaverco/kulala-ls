@@ -2378,13 +2378,24 @@
   },
   "extras": [],
   "conflicts": [
-    ["target_url"],
-    ["raw_body"],
-    ["_raw_body"],
-    ["_section_content"]
+    [
+      "target_url"
+    ],
+    [
+      "raw_body"
+    ],
+    [
+      "_raw_body"
+    ],
+    [
+      "_section_content"
+    ]
   ],
   "precedences": [],
   "externals": [],
-  "inline": ["_target_url_line", "__body"],
+  "inline": [
+    "_target_url_line",
+    "__body"
+  ],
   "supertypes": []
 }
