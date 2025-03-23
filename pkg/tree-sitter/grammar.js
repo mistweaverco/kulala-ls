@@ -90,7 +90,7 @@ module.exports = grammar({
 
     // LIST http verb is arbitrary and required to use vaultproject
     method: (_) =>
-      /(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT|PATCH|LIST|GRAPHQL|WEBSOCKET)/,
+      /(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT|PATCH|LIST|GRAPHQL|WEBSOCKET)/i,
 
     http_version: (_) => prec.dynamic(1, token(prec(0, /HTTP\/[\d\.]+/))),
 
