@@ -11,6 +11,7 @@ import {
   InitializeResult,
   CompletionParams,
   MarkupKind,
+  ExecuteCommandParams,
 } from "vscode-languageserver/node";
 
 import { Position, TextDocument } from "vscode-languageserver-textdocument";
@@ -65,6 +66,9 @@ connection.onInitialize((params: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
+      executeCommandProvider: {
+        commands: ["addRequestVariables"],
+      },
       // Enable completion with documentation support
       completionProvider: {
         resolveProvider: true, // Enable resolving additional information
@@ -114,6 +118,51 @@ let globalSettings: DefaultSettings = defaultSettings;
 
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<DefaultSettings>> = new Map();
+
+type RequestVariables = {
+  [key: string]: {
+    [key: string]: {
+      body: unknown;
+      headers: Record<string, string>;
+    };
+  };
+};
+
+const REQUEST_VARIABLES: RequestVariables = {};
+
+connection.onExecuteCommand((params: ExecuteCommandParams) => {
+  if (params.command === "addRequestVariables") {
+    try {
+      if (params.arguments && params.arguments.length > 0) {
+        const args = params.arguments[0];
+        REQUEST_VARIABLES[args.doc] = REQUEST_VARIABLES[args.doc] || {};
+        REQUEST_VARIABLES[args.doc][args.name] = {
+          body: args.body,
+          headers: args.headers,
+        };
+
+        Logger.log("Request variables received and stored.");
+        Logger.log(JSON.stringify(REQUEST_VARIABLES, null, 2));
+
+        return "Variables received";
+      } else {
+        Logger.log("No arguments provided for setRequestVariables");
+        return "No arguments provided";
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Logger.log(`Error processing JSON: ${error.message}`);
+        return `Error processing JSON: ${error.message}`;
+      } else {
+        Logger.log(`Unknown error processing JSON.`);
+        return `Unknown error processing JSON.`;
+      }
+    }
+  } else {
+    Logger.log(`Unknown command: ${params.command}`);
+    return `Unknown command: ${params.command}`;
+  }
+});
 
 connection.onDidChangeConfiguration((change) => {
   if (hasConfigurationCapability) {
