@@ -1,50 +1,67 @@
-; Methods
+; Highlight HTTP method
 (method) @function.method
 
-; Headers
-(header
-  name: (_) @constant)
+; Highlight URL
+(request url: (_) @string.special.url)
 
-; Variables
-(variable_declaration
-  name: (identifier) @variable)
-
-; Operators
-(comment
-  "=" @operator)
-(variable_declaration
-  "=" @operator)
-
-; keywords
-(comment
-  "@" @keyword
-  name: (_) @keyword)
-
-; Literals
-(request
-  url: (_) @string.special.url)
-
+; Highlight HTTP version
 (http_version) @constant
 
-; Response
+; Highlight status code and text in response
 (status_code) @number
 (status_text) @string
 
+; Highlight headers
+(header name: (_) @constant)
+
+; Highlight external JSON body path
+(external_body path: (_) @string.special.path)
+
+; Highlight request separators and comments
+[
+  (request_separator)
+  (comment)
+] @comment @spell
+
+; --- GraphQL Highlighting ---
+
+; Highlight 'mutation' and 'query' keywords, and the operation name
+(operation_definition
+  name: (name) @function.method
+  _ @keyword)
+
+; Highlight variable definitions in the operation's parameters
+(variable_definition
+  name: (variable) @variable
+  type: (named_type) @type)
+
+; Highlight the fields being selected within the operation's body
+(field
+  name: (name) @property)
+
+; Highlight the arguments passed to the fields
+(argument
+  name: (name) @variable)
+
+; --- Operators and Punctuation ---
+
+; Operators
+[
+  "="
+  "!"
+] @operator
+
 ; Punctuation
 [
-  "{{"
-  "}}"
-] @punctuation.bracket
+  ":"
+  "$"
+] @punctuation.delimiter
 
-(header
-  ":" @punctuation.delimiter)
-
-; external JSON body
-(external_body
-  path: (_) @string.special.path)
-
-; Comments
+; Brackets for both HTTP and GraphQL
 [
-  (comment)
-  (request_separator)
-] @comment @spell
+  "("
+  ")"
+  "{"
+  "}"
+  "..."
+] @punctuation.bracket
