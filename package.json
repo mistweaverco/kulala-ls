@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/package",
   "name": "@mistweaverco/kulala",
   "description": "A minimal language server for HTTP syntax.",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "private": true,
   "scripts": {
     "build": "npm-run-all build:*",
@@ -10,7 +10,7 @@
     "watch:server": "rollup -w -c --environment INCLUDE_DEPS,BUILD:production",
     "build:tree-sitter": "npm run --workspace @mistweaverco/tree-sitter-kulala build",
     "build:tree-sitter-graphql": "npm run --workspace @mistweaverco/tree-sitter-graphql build",
-    "generate:tree-sitter": "npm run --workspace @mistweaverco/tree-sitter generate-parser",
+    "generate:tree-sitter": "npm run --workspace @mistweaverco/tree-sitter-kulala generate-parser",
     "generate:tree-sitter-graphql": "npm run --workspace @mistweaverco/tree-sitter-graphql generate-parser",
     "lint": "npm-run-all lint:*",
     "lint:server": "npm-run-all lint:server:*",
